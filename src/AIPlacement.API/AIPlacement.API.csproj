@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AIPlacement.Application\AIPlacement.Application.csproj" />
     <ProjectReference Include="..\AIPlacement.Infrastructure\AIPlacement.Infrastructure.csproj" />
   </ItemGroup>
