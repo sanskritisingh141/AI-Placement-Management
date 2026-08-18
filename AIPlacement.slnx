@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="src/AIPlacement.API/AIPlacement.API.csproj" Id="35be2d35-8791-41b3-8ab3-44ab05c5e9ec" />
+</Solution>
