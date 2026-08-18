@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AIPlacement.Application\AIPlacement.Application.csproj" />
+    <ProjectReference Include="..\AIPlacement.Domain\AIPlacement.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

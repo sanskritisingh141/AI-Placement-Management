@@ -3,4 +3,9 @@
     <File Path=".gitignore" />
   </Folder>
   <Project Path="src/AIPlacement.API/AIPlacement.API.csproj" Id="35be2d35-8791-41b3-8ab3-44ab05c5e9ec" />
+  <Project Path="src/AIPlacement.Application/AIPlacement.Application.csproj" Id="8f619aa6-5854-4d0f-80ff-3f7b6f609b46" />
+  <Project Path="src/AIPlacement.Domain/AIPlacement.Domain.csproj" Id="28fcad51-e423-4a74-b140-fa58d09944ff" />
+  <Project Path="src/AIPlacement.Infrastructure/AIPlacement.Infrastructure.csproj" Id="4a414aa7-a393-4ff1-8d5c-29125927e977" />
+  <Project Path="src/AIPlacement.MVC/AIPlacement.MVC.csproj" Id="82196c7e-4865-4c29-a7d3-556024b41fd7" />
+  <Project Path="tests/AIPlacement.Tests/AIPlacement.Tests.csproj" Id="cfc65f28-2819-4b70-bed6-47452a49a22d" />
 </Solution>
