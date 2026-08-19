@@ -1,0 +1,33 @@
+﻿@model AIPlacement.Application.Admin.DTOs.AdminLoginRequestDto
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h2 class="mb-4">Placement Admin Login</h2>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <form asp-controller="Admin" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" placeholder="admin@aiplacement.edu" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+
+        <p class="text-muted mt-3 small">
+            Demo credentials (until Identity is wired up): <code>admin@aiplacement.edu</code> / <code>Admin@123</code>
+        </p>
+    </div>
+</div>

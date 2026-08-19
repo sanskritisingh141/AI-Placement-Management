@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Applications & Placements";
+    var applications = (IReadOnlyList<AIPlacement.Application.Admin.DTOs.ApplicationMonitorDto>)ViewBag.Applications;
+    var placements = (IReadOnlyList<AIPlacement.Application.Admin.DTOs.PlacementRecordDto>)ViewBag.Placements;
+}
+
+<h2 class="mb-1">Applications &amp; Placements</h2>
+<p class="text-muted">Welcome, @ViewBag.AdminName</p>
+
+<div class="card mb-4">
+    <div class="card-header">All Applications (@applications.Count)</div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Branch</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var application in applications)
+                {
+                    <tr>
+                        <td>@application.StudentName <span class="text-muted small">(@application.RollNo)</span></td>
+                        <td>@application.Branch</td>
+                        <td>@application.JobTitle</td>
+                        <td>@application.CompanyName</td>
+                        <td>@application.AppliedAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @{
+                                var badgeClass = application.CurrentStatus switch
+                                {
+                                    "Selected" => "bg-success",
+                                    "Rejected" => "bg-danger",
+                                    "Interview" or "Assessment" => "bg-info text-dark",
+                                    "Shortlisted" => "bg-primary",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass">@application.CurrentStatus</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Placement Results (@placements.Count)</span>
+        <a class="btn btn-sm btn-outline-primary" asp-controller="Admin" asp-action="ExportReport">Download CSV</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Branch</th>
+                    <th>Company</th>
+                    <th>Job Title</th>
+                    <th>Status</th>
+                    <th>Package</th>
+                    <th>Placement Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var placement in placements)
+                {
+                    <tr>
+                        <td>@placement.StudentName <span class="text-muted small">(@placement.RollNo)</span></td>
+                        <td>@placement.Branch</td>
+                        <td>@placement.CompanyName</td>
+                        <td>@placement.JobTitle</td>
+                        <td>@placement.PlacementStatus</td>
+                        <td>₹@placement.Package?.ToString("N0")</td>
+                        <td>@placement.PlacementDate?.ToString("dd MMM yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,139 @@
+﻿@model IReadOnlyList<AIPlacement.Application.Admin.DTOs.BranchPlacementStatDto>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var summary = (AIPlacement.Application.Admin.DTOs.DashboardSummaryDto)ViewBag.Summary;
+}
+
+<h2 class="mb-1">Placement Dashboard</h2>
+<p class="text-muted">Welcome, @ViewBag.AdminName</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Total Students</div>
+                <div class="fs-3 fw-bold">@summary.TotalStudents</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Total Companies</div>
+                <div class="fs-3 fw-bold">@summary.TotalCompanies</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Job Drives</div>
+                <div class="fs-3 fw-bold">@summary.TotalJobDrives</div>
+                <div class="small text-warning">@summary.PendingJobDriveApprovals pending approval</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Applications</div>
+                <div class="fs-3 fw-bold">@summary.TotalApplications</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Selected Students</div>
+                <div class="fs-3 fw-bold">@summary.SelectedStudents</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Placement %</div>
+                <div class="fs-3 fw-bold">@summary.PlacementPercentage%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Average Package</div>
+                <div class="fs-3 fw-bold">₹@summary.AveragePackage.ToString("N0")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="text-muted small text-uppercase">Highest Package</div>
+                <div class="fs-3 fw-bold">₹@summary.HighestPackage.ToString("N0")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Branch-wise Placement %</div>
+    <div class="card-body">
+        <canvas id="branchChart" height="90"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Branch Statistics</span>
+        <a class="btn btn-sm btn-outline-primary" asp-controller="Admin" asp-action="ExportReport">Download placement report (CSV)</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Branch</th>
+                    <th>Total Students</th>
+                    <th>Placed</th>
+                    <th>Placement %</th>
+                    <th>Avg. Package</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var branch in Model)
+                {
+                    <tr>
+                        <td>@branch.Branch</td>
+                        <td>@branch.TotalStudents</td>
+                        <td>@branch.PlacedStudents</td>
+                        <td>@branch.PlacementPercentage%</td>
+                        <td>₹@branch.AveragePackage.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+    <script>
+        const branchLabels = @Html.Raw(Json.Serialize(Model.Select(b => b.Branch)));
+        const branchPercentages = @Html.Raw(Json.Serialize(Model.Select(b => b.PlacementPercentage)));
+
+        new Chart(document.getElementById('branchChart'), {
+            type: 'bar',
+            data: {
+                labels: branchLabels,
+                datasets: [{
+                    label: 'Placement %',
+                    data: branchPercentages,
+                    backgroundColor: '#0d6efd'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 100 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+}

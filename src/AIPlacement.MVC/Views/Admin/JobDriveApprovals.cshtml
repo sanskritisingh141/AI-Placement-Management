@@ -1,0 +1,73 @@
+﻿@model IReadOnlyList<AIPlacement.Application.Admin.DTOs.JobDriveApprovalDto>
+@{
+    ViewData["Title"] = "Job Drive Approvals";
+}
+
+<h2 class="mb-1">Job Drive Approvals</h2>
+<p class="text-muted">Welcome, @ViewBag.AdminName</p>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Job Title</th>
+                <th>Location</th>
+                <th>Min CGPA</th>
+                <th>Package</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Approval</th>
+                <th style="min-width: 220px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var drive in Model)
+            {
+                <tr>
+                    <td>@drive.CompanyName</td>
+                    <td>@drive.JobTitle</td>
+                    <td>@drive.Location</td>
+                    <td>@drive.MinCGPA</td>
+                    <td>₹@drive.SalaryPackage?.ToString("N0")</td>
+                    <td>@drive.ApplicationDeadline?.ToString("dd MMM yyyy")</td>
+                    <td>@drive.Status</td>
+                    <td>
+                        @switch (drive.ApprovalStatus)
+                        {
+                            case "Approved":
+                                <span class="badge bg-success">Approved</span>
+                                break;
+                            case "Rejected":
+                                <span class="badge bg-danger">Rejected</span>
+                                break;
+                            default:
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        @if (drive.ApprovalStatus == "Pending")
+                        {
+                            <form asp-controller="Admin" asp-action="ApproveJobDrive" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobDriveId" value="@drive.JobDriveId" />
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form asp-controller="Admin" asp-action="RejectJobDrive" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobDriveId" value="@drive.JobDriveId" />
+                                <input type="hidden" name="reason" value="Does not meet placement cell guidelines" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                            </form>
+                        }
+                        else if (!string.IsNullOrEmpty(drive.RejectionReason))
+                        {
+                            <span class="text-muted small">@drive.RejectionReason</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Students & Recruiters";
+    var students = (IReadOnlyList<AIPlacement.Application.Admin.DTOs.UserRecordDto>)ViewBag.Students;
+    var recruiters = (IReadOnlyList<AIPlacement.Application.Admin.DTOs.UserRecordDto>)ViewBag.Recruiters;
+}
+
+<h2 class="mb-1">Students &amp; Recruiters</h2>
+<p class="text-muted">Welcome, @ViewBag.AdminName</p>
+
+<ul class="nav nav-tabs mb-3" id="usersTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students-pane" type="button" role="tab">
+            Students (@students.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="recruiters-tab" data-bs-toggle="tab" data-bs-target="#recruiters-pane" type="button" role="tab">
+            Recruiters (@recruiters.Count)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="students-pane" role="tabpanel">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Branch</th>
+                        <th>CGPA</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in students)
+                    {
+                        <tr>
+                            <td>@student.RollNo</td>
+                            <td>@student.Name</td>
+                            <td>@student.Email</td>
+                            <td>@student.Branch</td>
+                            <td>@student.CGPA</td>
+                            <td>
+                                @if (student.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-controller="Admin" asp-action="ToggleUserStatus" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@student.UserId" />
+                                    <input type="hidden" name="isActive" value="@(!student.IsActive)" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        @(student.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="recruiters-pane" role="tabpanel">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Contact Name</th>
+                        <th>Email</th>
+                        <th>Industry</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var recruiter in recruiters)
+                    {
+                        <tr>
+                            <td>@recruiter.CompanyName</td>
+                            <td>@recruiter.Name</td>
+                            <td>@recruiter.Email</td>
+                            <td>@recruiter.Industry</td>
+                            <td>
+                                @if (recruiter.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-controller="Admin" asp-action="ToggleUserStatus" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@recruiter.UserId" />
+                                    <input type="hidden" name="isActive" value="@(!recruiter.IsActive)" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        @(recruiter.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
