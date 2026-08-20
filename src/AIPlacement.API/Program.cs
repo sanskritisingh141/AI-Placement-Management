@@ -4,6 +4,8 @@ using AIPlacement.Application.Resumes.Interfaces;
 using AIPlacement.Application.Resumes.Services;
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Placements.Interfaces;
+using AIPlacement.Application.Placements.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,7 @@ builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IPlacementService, PlacementService>();
 
 var app = builder.Build();
 
