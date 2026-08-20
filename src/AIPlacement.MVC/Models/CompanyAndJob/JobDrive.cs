@@ -1,5 +1,5 @@
-﻿using AIPlacement.MVC.Models.Placement;
-using AllPlacement.MVC.Models;
+﻿using AIPlacement.MVC.Models.ApplicationsandRecruitment;
+using AIPlacement.MVC.Models.Placement;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace AIPlacement.MVC.Models.CompanyAndJob;
