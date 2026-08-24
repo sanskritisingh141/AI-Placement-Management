@@ -1,3 +1,8 @@
+using AIPlacement.Infrastructure.Company;
+using AIPlacement.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using AIPlacement.Application.Company.Interfaces;
+using AIPlacement.Application.Company.Services;
 using AIPlacement.Application.Students.Interfaces;
 using AIPlacement.Application.Students.Services;
 using AIPlacement.Application.Resumes.Interfaces;
@@ -18,6 +23,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 // Admin + Analytics (Pair 3)
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
