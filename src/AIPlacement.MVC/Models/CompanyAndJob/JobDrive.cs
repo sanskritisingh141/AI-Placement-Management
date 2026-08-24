@@ -1,4 +1,5 @@
-﻿using AIPlacement.MVC.Models.ApplicationsandRecruitment;
+﻿using ApplicationModel = AIPlacement.MVC.Models.ApplicationsandRecruitment.Application;
+using AIPlacement.MVC.Models.ApplicationsandRecruitment;
 using AIPlacement.MVC.Models.Placement;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -50,8 +51,8 @@ public class JobDrive
 
 
     // JobDrives 1 : M Applications
-    public ICollection<Application> Applications { get; set; }
-        = new List<Application>();
+    public ICollection<ApplicationModel> Applications { get; set; }
+    = new List<ApplicationModel>();
 
 
     // JobDrives 1 : M InterviewRounds

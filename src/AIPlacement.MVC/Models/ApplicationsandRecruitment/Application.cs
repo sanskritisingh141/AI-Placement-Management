@@ -18,7 +18,7 @@ public class Application
 
 
     // StudentProfiles 1 : M Applications
-    public StudentProfile StudentProfile { get; set; } = null!;
+    //public StudentProfile StudentProfile { get; set; } = null!;
 
 
     // JobDrives 1 : M Applications

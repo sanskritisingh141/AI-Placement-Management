@@ -1,4 +1,4 @@
-﻿using AIPlacement.MVC.Models.ApplicationsandRecruitment;
+﻿using ApplicationModel = AIPlacement.MVC.Models.ApplicationsandRecruitment.Application;
 using AIPlacement.MVC.Models.CompanyAndJob;
 
 namespace AIPlacement.MVC.Models.Placement;
@@ -23,7 +23,7 @@ public class PlacementResult
 
 
     // StudentProfiles 1 : M PlacementResults
-    public StudentProfile StudentProfile { get; set; } = null!;
+   // public StudentProfile StudentProfile { get; set; } = null!;
 
 
     // JobDrives 1 : M PlacementResults
@@ -31,5 +31,5 @@ public class PlacementResult
 
 
     // Applications 1 : 1 PlacementResults
-    public Application Application { get; set; } = null!;
+    public ApplicationModel Application { get; set; } = null!;
 }

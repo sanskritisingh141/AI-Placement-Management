@@ -20,5 +20,5 @@ public class ApplicationStatusHistory
 
 
     // Users 1 : M ApplicationStatusHistory
-    public User ChangedByUser { get; set; } = null!;
+    //public User ChangedByUser { get; set; } = null!;
 }

@@ -6,7 +6,7 @@
 
         public int UserId { get; set; }
 
-        public string CompanyName { get; set; } = null;
+        public string CompanyName { get; set; } = null!;
 
         public string? Description { get; set; }
 
@@ -18,7 +18,7 @@
 
         public string? ContactPhone { get; set; }
 
-        public User User { get; set; } = null;
+        //public User User { get; set; } = null;
 
         public ICollection<JobDrive> JobDrives { get; set; }
             = new List<JobDrive>();
