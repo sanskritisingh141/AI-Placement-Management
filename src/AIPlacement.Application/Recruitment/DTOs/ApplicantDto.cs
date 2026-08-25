@@ -8,4 +8,5 @@ public class ApplicantDto
     public DateTime AppliedAt { get; set; }
     public string CurrentStatus { get; set; } = null!;
     public string? RecruiterRemarks { get; set; }
+    public decimal? MatchScore { get; set; }
 }

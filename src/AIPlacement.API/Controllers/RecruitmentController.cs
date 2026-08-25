@@ -1,11 +1,13 @@
 using AIPlacement.Application.Recruitment.DTOs;
 using AIPlacement.Application.Recruitment.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIPlacement.API.Controllers;
 
 [ApiController]
 [Route("api/recruitment")]
+[Authorize]
 public class RecruitmentController : ControllerBase
 {
     private readonly IRecruitmentService _recruitmentService;
@@ -15,7 +17,30 @@ public class RecruitmentController : ControllerBase
         _recruitmentService = recruitmentService;
     }
 
+    [HttpPost("applications")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> Apply(ApplyToJobDriveDto request)
+    {
+        try
+        {
+            var applicant = await _recruitmentService.ApplyAsync(request);
+            return CreatedAtAction(
+                nameof(GetApplicants),
+                new { jobDriveId = applicant.JobDriveId },
+                applicant);
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+    }
+
     [HttpGet("job-drives/{jobDriveId:int}/applicants")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> GetApplicants(int jobDriveId)
     {
         var applicants = await _recruitmentService.GetApplicantsAsync(jobDriveId);
@@ -23,6 +48,7 @@ public class RecruitmentController : ControllerBase
     }
 
     [HttpPatch("applications/{applicationId:int}/status")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> UpdateApplicationStatus(
         int applicationId,
         UpdateApplicationStatusDto request)
@@ -47,6 +73,7 @@ public class RecruitmentController : ControllerBase
     }
 
     [HttpPost("interview-rounds")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> CreateInterviewRound(
         CreateInterviewRoundDto request)
     {
@@ -64,6 +91,7 @@ public class RecruitmentController : ControllerBase
     }
 
     [HttpPost("interviews")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> ScheduleInterview(
         ScheduleInterviewDto request)
     {
@@ -87,6 +115,7 @@ public class RecruitmentController : ControllerBase
     }
 
     [HttpPost("interviews/{interviewId:int}/result")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> RecordInterviewResult(
         int interviewId,
         RecordInterviewResultDto request)

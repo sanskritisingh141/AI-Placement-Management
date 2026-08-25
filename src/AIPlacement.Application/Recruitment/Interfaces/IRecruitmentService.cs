@@ -4,6 +4,10 @@ namespace AIPlacement.Application.Recruitment.Interfaces;
 
 public interface IRecruitmentService
 {
+    Task<EligibilityResultDto> CheckEligibilityAsync(int studentId, int jobDriveId);
+
+    Task<ApplicantDto> ApplyAsync(ApplyToJobDriveDto request);
+
     Task<IReadOnlyList<ApplicantDto>> GetApplicantsAsync(int jobDriveId);
 
     Task<ApplicantDto?> UpdateApplicationStatusAsync(

@@ -1,21 +1,29 @@
 using AIPlacement.Application.Jobs.DTOs;
 using AIPlacement.Application.Jobs.Interfaces;
+using AIPlacement.Application.Recruitment.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIPlacement.API.Controllers;
 
 [ApiController]
 [Route("api/job-drives")]
+[Authorize]
 public class JobDrivesController : ControllerBase
 {
     private readonly IJobDriveService _jobDriveService;
+    private readonly IRecruitmentService _recruitmentService;
 
-    public JobDrivesController(IJobDriveService jobDriveService)
+    public JobDrivesController(
+        IJobDriveService jobDriveService,
+        IRecruitmentService recruitmentService)
     {
         _jobDriveService = jobDriveService;
+        _recruitmentService = recruitmentService;
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAvailable()
     {
         var jobDrives = await _jobDriveService.GetAvailableAsync();
@@ -23,6 +31,7 @@ public class JobDrivesController : ControllerBase
     }
 
     [HttpGet("{jobDriveId:int}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int jobDriveId)
     {
         var jobDrive = await _jobDriveService.GetByIdAsync(jobDriveId);
@@ -33,13 +42,31 @@ public class JobDrivesController : ControllerBase
     }
 
     [HttpGet("company/{companyId:int}")]
+    [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> GetByCompany(int companyId)
     {
         var jobDrives = await _jobDriveService.GetByCompanyIdAsync(companyId);
         return Ok(jobDrives);
     }
 
+    [HttpGet("{jobDriveId:int}/check-eligibility/{studentId:int}")]
+    [Authorize(Roles = "Student,Company,Admin")]
+    public async Task<IActionResult> CheckEligibility(int jobDriveId, int studentId)
+    {
+        try
+        {
+            var result = await _recruitmentService
+                .CheckEligibilityAsync(studentId, jobDriveId);
+            return Ok(result);
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+    }
+
     [HttpPost]
+    [Authorize(Roles = "Company")]
     public async Task<IActionResult> Create(CreateJobDriveDto request)
     {
         try
@@ -58,6 +85,7 @@ public class JobDrivesController : ControllerBase
     }
 
     [HttpPut("{jobDriveId:int}")]
+    [Authorize(Roles = "Company")]
     public async Task<IActionResult> Update(
         int jobDriveId,
         UpdateJobDriveDto request)
@@ -81,6 +109,7 @@ public class JobDrivesController : ControllerBase
     }
 
     [HttpPatch("{jobDriveId:int}/publish")]
+    [Authorize(Roles = "Company")]
     public async Task<IActionResult> Publish(int jobDriveId)
     {
         try
@@ -98,6 +127,7 @@ public class JobDrivesController : ControllerBase
     }
 
     [HttpPatch("{jobDriveId:int}/close")]
+    [Authorize(Roles = "Company")]
     public async Task<IActionResult> Close(int jobDriveId)
     {
         var jobDrive = await _jobDriveService.CloseAsync(jobDriveId);

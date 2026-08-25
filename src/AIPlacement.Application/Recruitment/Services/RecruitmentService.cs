@@ -1,8 +1,12 @@
+using AIPlacement.Application.Jobs;
 using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.Application.Recruitment.DTOs;
 using AIPlacement.Application.Recruitment.Interfaces;
 using AIPlacement.Domain.Entities.Applications;
+using AIPlacement.Domain.Entities.Placement;
 using AIPlacement.Domain.Entities.Recruitment;
+
+using ApplicationEntity = AIPlacement.Domain.Entities.Applications.Application;
 
 namespace AIPlacement.Application.Recruitment.Services;
 
@@ -19,12 +23,126 @@ public class RecruitmentService : IRecruitmentService
         _jobDriveRepository = jobDriveRepository;
     }
 
+    public async Task<EligibilityResultDto> CheckEligibilityAsync(
+        int studentId, int jobDriveId)
+    {
+        var student = await _recruitmentRepository.GetStudentProfileAsync(studentId);
+        if (student is null)
+            throw new ArgumentException("Student not found.");
+
+        var jobDrive = await _jobDriveRepository.GetByIdAsync(jobDriveId);
+        if (jobDrive is null)
+            throw new ArgumentException("Job drive not found.");
+
+        var criteria = await _jobDriveRepository.GetEligibilityCriteriaAsync(jobDriveId);
+        var eligibleBranches = await _jobDriveRepository.GetEligibleBranchesAsync(jobDriveId);
+
+        var result = new EligibilityResultDto { IsEligible = true };
+
+        if (criteria is not null)
+        {
+            if (student.CGPA < criteria.MinCGPA)
+            {
+                result.IsEligible = false;
+                result.Reasons.Add(
+                    $"CGPA {student.CGPA} is below the minimum requirement of {criteria.MinCGPA}.");
+            }
+
+            if (criteria.GraduationYear > 0 && student.GraduationYear != criteria.GraduationYear)
+            {
+                result.IsEligible = false;
+                result.Reasons.Add(
+                    $"Graduation year {student.GraduationYear} does not match the required year {criteria.GraduationYear}.");
+            }
+        }
+
+        if (eligibleBranches.Count > 0)
+        {
+            var branchMatch = eligibleBranches.Any(b =>
+                string.Equals(b.BranchName, student.Branch, StringComparison.OrdinalIgnoreCase));
+
+            if (!branchMatch)
+            {
+                result.IsEligible = false;
+                result.Reasons.Add(
+                    $"Branch '{student.Branch}' is not in the list of eligible branches.");
+            }
+        }
+
+        if (jobDrive.Status != JobDriveStatus.Open)
+        {
+            result.IsEligible = false;
+            result.Reasons.Add("Job drive is not open for applications.");
+        }
+
+        if (jobDrive.ApplicationDeadline <= DateTime.UtcNow)
+        {
+            result.IsEligible = false;
+            result.Reasons.Add("Application deadline has passed.");
+        }
+
+        return result;
+    }
+
+    public async Task<ApplicantDto> ApplyAsync(ApplyToJobDriveDto request)
+    {
+        if (request.StudentId <= 0)
+            throw new ArgumentException("A valid student ID is required.");
+
+        if (request.JobDriveId <= 0)
+            throw new ArgumentException("A valid job drive ID is required.");
+
+        var eligibility = await CheckEligibilityAsync(request.StudentId, request.JobDriveId);
+        if (!eligibility.IsEligible)
+            throw new InvalidOperationException(
+                $"Student is not eligible: {string.Join(" ", eligibility.Reasons)}");
+
+        var alreadyApplied = await _recruitmentRepository
+            .ApplicationExistsAsync(request.StudentId, request.JobDriveId);
+        if (alreadyApplied)
+            throw new InvalidOperationException("Student has already applied to this job drive.");
+
+        var application = new ApplicationEntity
+        {
+            StudentId = request.StudentId,
+            JobDriveId = request.JobDriveId,
+            AppliedAt = DateTime.UtcNow,
+            CurrentStatus = RecruitmentStatus.Applied
+        };
+
+        await _recruitmentRepository.AddApplicationAsync(application);
+
+        var history = new ApplicationStatusHistory
+        {
+            ApplicationId = application.ApplicationId,
+            Status = RecruitmentStatus.Applied,
+            ChangedAt = application.AppliedAt,
+            ChangedBy = request.StudentId,
+            Remarks = "Application submitted."
+        };
+
+        await _recruitmentRepository.AddApplicationStatusHistoryAsync(history);
+
+        var matchScore = await _recruitmentRepository
+            .GetMatchScoreAsync(request.StudentId, request.JobDriveId);
+
+        return MapApplicant(application, matchScore);
+    }
+
     public async Task<IReadOnlyList<ApplicantDto>> GetApplicantsAsync(int jobDriveId)
     {
         var applications = await _recruitmentRepository
             .GetApplicationsByJobDriveIdAsync(jobDriveId);
 
-        return applications.Select(MapApplicant).ToList();
+        var matchScores = await _recruitmentRepository
+            .GetMatchScoresByJobDriveAsync(jobDriveId);
+
+        var scoresByStudent = matchScores.ToDictionary(m => m.StudentId, m => m.MatchScore);
+
+        return applications.Select(a => MapApplicant(
+            a,
+            scoresByStudent.GetValueOrDefault(a.StudentId)
+        )).ToList();
     }
 
     public async Task<ApplicantDto?> UpdateApplicationStatusAsync(
@@ -74,7 +192,28 @@ public class RecruitmentService : IRecruitmentService
         await _recruitmentRepository.UpdateApplicationAsync(application);
         await _recruitmentRepository.AddApplicationStatusHistoryAsync(history);
 
-        return MapApplicant(application);
+        if (status == RecruitmentStatus.Selected)
+        {
+            var jobDrive = await _jobDriveRepository.GetByIdAsync(application.JobDriveId);
+
+            var placementResult = new PlacementResult
+            {
+                StudentId = application.StudentId,
+                JobDriveId = application.JobDriveId,
+                ApplicationId = application.ApplicationId,
+                PlacementStatus = "Placed",
+                Package = jobDrive?.SalaryPackage ?? 0,
+                PlacementDate = DateTime.UtcNow,
+                OfferDetails = request.Remarks?.Trim()
+            };
+
+            await _recruitmentRepository.AddPlacementResultAsync(placementResult);
+        }
+
+        var matchScore = await _recruitmentRepository
+            .GetMatchScoreAsync(application.StudentId, application.JobDriveId);
+
+        return MapApplicant(application, matchScore);
     }
 
     public async Task<InterviewRoundDto> CreateInterviewRoundAsync(
@@ -202,7 +341,8 @@ public class RecruitmentService : IRecruitmentService
     }
 
     private static ApplicantDto MapApplicant(
-        AIPlacement.Domain.Entities.Applications.Application application)
+        ApplicationEntity application,
+        decimal? matchScore = null)
     {
         return new ApplicantDto
         {
@@ -211,7 +351,8 @@ public class RecruitmentService : IRecruitmentService
             JobDriveId = application.JobDriveId,
             AppliedAt = application.AppliedAt,
             CurrentStatus = application.CurrentStatus ?? RecruitmentStatus.Applied,
-            RecruiterRemarks = application.RecruiterRemarks
+            RecruiterRemarks = application.RecruiterRemarks,
+            MatchScore = matchScore
         };
     }
 
