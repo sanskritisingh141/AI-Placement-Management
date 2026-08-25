@@ -1,4 +1,6 @@
-﻿namespace AIPlacement.MVC.Models.CompanyAndJob
+﻿using AIPlacement.Domain.Entities;
+namespace AIPlacement.MVC.Models.CompanyAndJob
+
 {
     public class CompanyProfiles
     {
@@ -18,7 +20,7 @@
 
         public string? ContactPhone { get; set; }
 
-        //public User User { get; set; } = null;
+        public User User { get; set; } = null!;
 
         public ICollection<JobDrive> JobDrives { get; set; }
             = new List<JobDrive>();

@@ -1,24 +1,19 @@
-﻿namespace AIPlacement.MVC.Models.ApplicationsandRecruitment;
+﻿using AIPlacement.Domain.Entities;
 
-public class ApplicationStatusHistory
+namespace AIPlacement.MVC.Models.ApplicationsandRecruitment
 {
-    public int HistoryId { get; set; }
+    public class ApplicationStatusHistory
+    {
+        public string? Status { get; set; }
 
-    public int ApplicationId { get; set; }
+        public DateTime ChangedAt { get; set; }
 
-    public string? Status { get; set; }
+        public int ChangedBy { get; set; }
 
-    public DateTime ChangedAt { get; set; }
+        public string? Remarks { get; set; }
 
-    public int ChangedBy { get; set; }
+        public Application Application { get; set; } = null!;
 
-    public string? Remarks { get; set; }
-
-
-    // Applications 1 : M ApplicationStatusHistory
-    public Application Application { get; set; } = null!;
-
-
-    // Users 1 : M ApplicationStatusHistory
-    //public User ChangedByUser { get; set; } = null!;
+        public User ChangedByUser { get; set; } = null!;
+    }
 }
