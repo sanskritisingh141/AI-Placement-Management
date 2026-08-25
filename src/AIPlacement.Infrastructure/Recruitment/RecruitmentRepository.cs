@@ -73,10 +73,10 @@ public class RecruitmentRepository : IRecruitmentRepository
                 schedule.InterviewId == interviewId);
     }
     public async Task UpdateInterviewScheduleAsync(
-    InterviewSchedule interviewSchedule)
+        InterviewSchedule interviewSchedule)
     {
-    _dbContext.InterviewSchedules.Update(interviewSchedule);
-    await _dbContext.SaveChangesAsync();
+        _dbContext.InterviewSchedules.Update(interviewSchedule);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<InterviewResult?> GetInterviewResultByInterviewIdAsync(

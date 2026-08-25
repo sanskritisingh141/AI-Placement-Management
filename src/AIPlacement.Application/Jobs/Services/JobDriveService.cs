@@ -16,36 +16,27 @@ public class JobDriveService : IJobDriveService
     public async Task<IReadOnlyList<JobDriveDto>> GetAvailableAsync()
     {
         var jobDrives = await _jobDriveRepository.GetAvailableAsync();
-        var results = new List<JobDriveDto>();
-
-        foreach (var jobDrive in jobDrives)
-        {
-            results.Add(await MapToDtoAsync(jobDrive));
-        }
-
-        return results;
+        return await MapToDtoBatchAsync(jobDrives);
     }
 
     public async Task<IReadOnlyList<JobDriveDto>> GetByCompanyIdAsync(int companyId)
     {
         var jobDrives = await _jobDriveRepository.GetByCompanyIdAsync(companyId);
-        var results = new List<JobDriveDto>();
-
-        foreach (var jobDrive in jobDrives)
-        {
-            results.Add(await MapToDtoAsync(jobDrive));
-        }
-
-        return results;
+        return await MapToDtoBatchAsync(jobDrives);
     }
 
     public async Task<JobDriveDto?> GetByIdAsync(int jobDriveId)
     {
         var jobDrive = await _jobDriveRepository.GetByIdAsync(jobDriveId);
 
-        return jobDrive is null
-            ? null
-            : await MapToDtoAsync(jobDrive);
+        if (jobDrive is null)
+            return null;
+
+        var criteria = await _jobDriveRepository.GetEligibilityCriteriaAsync(jobDriveId);
+        var skills = await _jobDriveRepository.GetJobSkillsAsync(jobDriveId);
+        var branches = await _jobDriveRepository.GetEligibleBranchesAsync(jobDriveId);
+
+        return MapToDto(jobDrive, criteria, skills, branches);
     }
 
     public async Task<JobDriveDto> CreateAsync(CreateJobDriveDto request)
@@ -62,8 +53,8 @@ public class JobDriveService : IJobDriveService
             GraduationYear = request.GraduationYear,
             SalaryPackage = request.SalaryPackage,
             ApplicationDeadline = request.ApplicationDeadline,
-            Status = "Draft",
-            ApprovalStatus = "Pending",
+            Status = JobDriveStatus.Draft,
+            ApprovalStatus = JobDriveApprovalStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -99,7 +90,7 @@ public class JobDriveService : IJobDriveService
             jobSkills,
             eligibleBranches);
 
-        return await MapToDtoAsync(jobDrive);
+        return MapToDto(jobDrive, eligibilityCriteria, jobSkills, eligibleBranches);
     }
 
     public async Task<JobDriveDto?> UpdateAsync(int jobDriveId, UpdateJobDriveDto request)
@@ -109,14 +100,10 @@ public class JobDriveService : IJobDriveService
         var jobDrive = await _jobDriveRepository.GetByIdAsync(jobDriveId);
 
         if (jobDrive is null)
-        {
             return null;
-        }
 
-        if (jobDrive.Status == "Closed")
-        {
+        if (jobDrive.Status == JobDriveStatus.Closed)
             throw new InvalidOperationException("A closed job drive cannot be edited.");
-        }
 
         jobDrive.JobTitle = request.JobTitle.Trim();
         jobDrive.JobDescription = request.JobDescription.Trim();
@@ -158,7 +145,7 @@ public class JobDriveService : IJobDriveService
             jobSkills,
             eligibleBranches);
 
-        return await MapToDtoAsync(jobDrive);
+        return MapToDto(jobDrive, eligibilityCriteria, jobSkills, eligibleBranches);
     }
 
     public async Task<JobDriveDto?> PublishAsync(int jobDriveId)
@@ -166,20 +153,22 @@ public class JobDriveService : IJobDriveService
         var jobDrive = await _jobDriveRepository.GetByIdAsync(jobDriveId);
 
         if (jobDrive is null)
-        {
             return null;
-        }
 
-        if (jobDrive.ApprovalStatus != "Approved")
+        if (jobDrive.ApprovalStatus != JobDriveApprovalStatus.Approved)
         {
             throw new InvalidOperationException(
                 "Only an admin-approved job drive can be published.");
         }
 
-        jobDrive.Status = "Open";
+        jobDrive.Status = JobDriveStatus.Open;
         await _jobDriveRepository.UpdateJobDriveAsync(jobDrive);
 
-        return await MapToDtoAsync(jobDrive);
+        var criteria = await _jobDriveRepository.GetEligibilityCriteriaAsync(jobDriveId);
+        var skills = await _jobDriveRepository.GetJobSkillsAsync(jobDriveId);
+        var branches = await _jobDriveRepository.GetEligibleBranchesAsync(jobDriveId);
+
+        return MapToDto(jobDrive, criteria, skills, branches);
     }
 
     public async Task<JobDriveDto?> CloseAsync(int jobDriveId)
@@ -187,27 +176,52 @@ public class JobDriveService : IJobDriveService
         var jobDrive = await _jobDriveRepository.GetByIdAsync(jobDriveId);
 
         if (jobDrive is null)
-        {
             return null;
-        }
 
-        jobDrive.Status = "Closed";
+        jobDrive.Status = JobDriveStatus.Closed;
         await _jobDriveRepository.UpdateJobDriveAsync(jobDrive);
 
-        return await MapToDtoAsync(jobDrive);
+        var criteria = await _jobDriveRepository.GetEligibilityCriteriaAsync(jobDriveId);
+        var skills = await _jobDriveRepository.GetJobSkillsAsync(jobDriveId);
+        var branches = await _jobDriveRepository.GetEligibleBranchesAsync(jobDriveId);
+
+        return MapToDto(jobDrive, criteria, skills, branches);
     }
 
-    private async Task<JobDriveDto> MapToDtoAsync(JobDrive jobDrive)
+    private async Task<IReadOnlyList<JobDriveDto>> MapToDtoBatchAsync(
+        IReadOnlyList<JobDrive> jobDrives)
     {
-        var eligibilityCriteria =
-            await _jobDriveRepository.GetEligibilityCriteriaAsync(jobDrive.JobDriveId);
+        if (jobDrives.Count == 0)
+            return [];
 
-        var jobSkills =
-            await _jobDriveRepository.GetJobSkillsAsync(jobDrive.JobDriveId);
+        var ids = jobDrives.Select(j => j.JobDriveId).ToList();
 
-        var eligibleBranches =
-            await _jobDriveRepository.GetEligibleBranchesAsync(jobDrive.JobDriveId);
+        var criteriaByJobDrive = (await _jobDriveRepository
+            .GetEligibilityCriteriaBatchAsync(ids))
+            .ToDictionary(c => c.JobDriveId);
 
+        var skillsByJobDrive = (await _jobDriveRepository
+            .GetJobSkillsBatchAsync(ids))
+            .ToLookup(s => s.JobDriveId);
+
+        var branchesByJobDrive = (await _jobDriveRepository
+            .GetEligibleBranchesBatchAsync(ids))
+            .ToLookup(b => b.JobDriveId);
+
+        return jobDrives.Select(jd => MapToDto(
+            jd,
+            criteriaByJobDrive.GetValueOrDefault(jd.JobDriveId),
+            skillsByJobDrive[jd.JobDriveId].ToList(),
+            branchesByJobDrive[jd.JobDriveId].ToList()
+        )).ToList();
+    }
+
+    private static JobDriveDto MapToDto(
+        JobDrive jobDrive,
+        EligibilityCriteria? eligibilityCriteria,
+        IReadOnlyList<JobSkill> jobSkills,
+        IReadOnlyList<JobEligibleBranch> eligibleBranches)
+    {
         return new JobDriveDto
         {
             JobDriveId = jobDrive.JobDriveId,

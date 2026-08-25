@@ -1,3 +1,4 @@
+using AIPlacement.Application.Jobs;
 using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.Domain.Entities.Jobs;
 using AIPlacement.Infrastructure.Data;
@@ -17,8 +18,8 @@ public class JobDriveRepository : IJobDriveRepository
     public async Task<IReadOnlyList<JobDrive>> GetAvailableAsync()
     {
         return await _dbContext.JobDrives
-            .Where(j => j.Status == "Open"
-                     && j.ApprovalStatus == "Approved"
+            .Where(j => j.Status == JobDriveStatus.Open
+                     && j.ApprovalStatus == JobDriveApprovalStatus.Approved
                      && j.ApplicationDeadline >= DateTime.UtcNow)
             .OrderBy(j => j.ApplicationDeadline)
             .ToListAsync();
@@ -58,12 +59,41 @@ public class JobDriveRepository : IJobDriveRepository
             .ToListAsync();
     }
 
+    public async Task<IReadOnlyList<EligibilityCriteria>> GetEligibilityCriteriaBatchAsync(
+        IEnumerable<int> jobDriveIds)
+    {
+        var ids = jobDriveIds.ToList();
+        return await _dbContext.EligibilityCriterias
+            .Where(e => ids.Contains(e.JobDriveId))
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<JobSkill>> GetJobSkillsBatchAsync(
+        IEnumerable<int> jobDriveIds)
+    {
+        var ids = jobDriveIds.ToList();
+        return await _dbContext.JobSkills
+            .Where(s => ids.Contains(s.JobDriveId))
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<JobEligibleBranch>> GetEligibleBranchesBatchAsync(
+        IEnumerable<int> jobDriveIds)
+    {
+        var ids = jobDriveIds.ToList();
+        return await _dbContext.JobEligibleBranches
+            .Where(b => ids.Contains(b.JobDriveId))
+            .ToListAsync();
+    }
+
     public async Task AddAsync(
         JobDrive jobDrive,
         EligibilityCriteria eligibilityCriteria,
         IEnumerable<JobSkill> jobSkills,
         IEnumerable<JobEligibleBranch> eligibleBranches)
     {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
         await _dbContext.JobDrives.AddAsync(jobDrive);
         await _dbContext.SaveChangesAsync();
 
@@ -83,12 +113,14 @@ public class JobDriveRepository : IJobDriveRepository
         await _dbContext.JobSkills.AddRangeAsync(jobSkills);
         await _dbContext.JobEligibleBranches.AddRangeAsync(eligibleBranches);
         await _dbContext.SaveChangesAsync();
+
+        await transaction.CommitAsync();
     }
 
     public async Task UpdateJobDriveAsync(JobDrive jobDrive)
     {
-    _dbContext.JobDrives.Update(jobDrive);
-    await _dbContext.SaveChangesAsync();
+        _dbContext.JobDrives.Update(jobDrive);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(
