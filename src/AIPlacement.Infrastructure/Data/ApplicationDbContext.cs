@@ -1,11 +1,10 @@
 using AIPlacement.Domain.Entities;
 using AIPlacement.Domain.Entities.Applications;
 using AIPlacement.Domain.Entities.Recruitment;
-using AIPlacement.Domain.Entities;
-using AIPlacement.Domain.Entities.Applications;
-using AIPlacement.Domain.Entities.Recruitment;
+using AIPlacement.Domain.Entities.Resumes;
+using AIPlacement.Domain.Entities.Students;
 using Microsoft.EntityFrameworkCore;
-
+using ApplicationEntity = AIPlacement.Domain.Entities.Applications.Application;
 namespace AIPlacement.Infrastructure.Data;
 
 public class ApplicationDbContext : DbContext
@@ -18,7 +17,23 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<CompanyProfile> CompanyProfiles { get; set; }
 
-    public DbSet<Application> Applications { get; set; }
+    public DbSet<User> Users { get; set; }
+
+    public DbSet<Role> Roles { get; set; }
+
+    public DbSet<StudentProfile> StudentProfiles { get; set; }
+
+    public DbSet<StudentSkill> StudentSkills { get; set; }
+
+    public DbSet<Skill> Skills { get; set; }
+
+    public DbSet<Resume> Resumes { get; set; }
+
+    public DbSet<Certification> Certifications { get; set; }
+
+    public DbSet<Project> Projects { get; set; }
+
+    public DbSet<ApplicationEntity> Applications { get; set; }
 
     public DbSet<ApplicationStatusHistory> ApplicationStatusHistories { get; set; }
 

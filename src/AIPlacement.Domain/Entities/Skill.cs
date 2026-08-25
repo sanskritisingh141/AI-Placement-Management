@@ -6,6 +6,6 @@ namespace AIPlacement.Domain.Entities
 
         public string SkillName { get; set; } = string.Empty;
 
-        public int StudentId { get; set; }
+        public string? Category { get; set; }
     }
 }
