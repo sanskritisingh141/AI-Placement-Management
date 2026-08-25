@@ -5,6 +5,7 @@ using AIPlacement.Domain.Entities.Recruitment;
 using AIPlacement.Domain.Entities.Resumes;
 using AIPlacement.Domain.Entities.Students;
 using AIPlacement.Domain.Entities.Jobs;
+using AIPlacement.Domain.Entities.Placement;
 using Microsoft.EntityFrameworkCore;
 
 using ApplicationEntity = AIPlacement.Domain.Entities.Applications.Application;
@@ -61,31 +62,17 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<AIRecommendation> AIRecommendations { get; set; }
 
+    public DbSet<PlacementResult> PlacementResults { get; set; }
+
+    public DbSet<JobMatchScore> JobMatchScores { get; set; }
+
+    public DbSet<SkillGap> SkillGaps { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(ApplicationDbContext).Assembly);
-
-        modelBuilder.Entity<CompanyProfile>(entity =>
-        {
-            entity.ToTable("CompanyProfiles");
-
-            entity.HasKey(x => x.CompanyId);
-
-            entity.Property(x => x.CompanyName)
-                .IsRequired();
-
-            entity.Property(x => x.Description);
-
-            entity.Property(x => x.Website);
-
-            entity.Property(x => x.Industry);
-
-            entity.Property(x => x.ContactEmail);
-
-            entity.Property(x => x.ContactPhone);
-        });
     }
 }
