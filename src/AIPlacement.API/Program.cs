@@ -11,6 +11,12 @@ using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
 using AIPlacement.Application.Placements.Interfaces;
 using AIPlacement.Application.Placements.Services;
+using AIPlacement.Application.Jobs.Interfaces;
+using AIPlacement.Application.Jobs.Services;
+using AIPlacement.Infrastructure.Jobs;
+using AIPlacement.Application.Recruitment.Interfaces;
+using AIPlacement.Application.Recruitment.Services;
+using AIPlacement.Infrastructure.Recruitment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +35,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IJobDriveRepository, JobDriveRepository>();
+builder.Services.AddScoped<IJobDriveService, JobDriveService>();
 
 // Admin + Analytics (Pair 3)
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
@@ -37,6 +45,8 @@ builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IPlacementService, PlacementService>();
+builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
+builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
 var app = builder.Build();
 
