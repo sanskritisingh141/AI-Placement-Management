@@ -1,3 +1,4 @@
+using AIPlacement.Domain.Entities;
 using AIPlacement.Domain.Entities.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -43,5 +44,9 @@ public class JobDriveConfiguration
 
         builder.Property(x => x.CreatedAt)
             .IsRequired();
+        builder.HasOne<CompanyProfile>()
+            .WithMany()
+            .HasForeignKey(x => x.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

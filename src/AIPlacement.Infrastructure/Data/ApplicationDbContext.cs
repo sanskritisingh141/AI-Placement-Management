@@ -1,10 +1,14 @@
 using AIPlacement.Domain.Entities;
+using AIPlacement.Domain.Entities.AI;
 using AIPlacement.Domain.Entities.Applications;
 using AIPlacement.Domain.Entities.Recruitment;
 using AIPlacement.Domain.Entities.Resumes;
 using AIPlacement.Domain.Entities.Students;
+using AIPlacement.Domain.Entities.Jobs;
 using Microsoft.EntityFrameworkCore;
+
 using ApplicationEntity = AIPlacement.Domain.Entities.Applications.Application;
+
 namespace AIPlacement.Infrastructure.Data;
 
 public class ApplicationDbContext : DbContext
@@ -42,6 +46,20 @@ public class ApplicationDbContext : DbContext
     public DbSet<InterviewSchedule> InterviewSchedules { get; set; }
 
     public DbSet<InterviewResult> InterviewResults { get; set; }
+
+    public DbSet<JobDrive> JobDrives { get; set; }
+
+    public DbSet<JobSkill> JobSkills { get; set; }
+
+    public DbSet<JobEligibleBranch> JobEligibleBranches { get; set; }
+
+    public DbSet<EligibilityCriteria> EligibilityCriterias { get; set; }
+
+    public DbSet<ResumeAnalysis> ResumeAnalyses { get; set; }
+
+    public DbSet<ExtractedSkill> ExtractedSkills { get; set; }
+
+    public DbSet<AIRecommendation> AIRecommendations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

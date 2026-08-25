@@ -2,32 +2,32 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AIPlacement.Infrastructure.Data.Configurations
+namespace AIPlacement.Infrastructure.Data.Configurations;
+
+public class CertificationConfiguration
+    : IEntityTypeConfiguration<Certification>
 {
-    public class CertificationConfiguration : IEntityTypeConfiguration<Certification>
+    public void Configure(EntityTypeBuilder<Certification> builder)
     {
-        public void Configure(EntityTypeBuilder<Certification> builder)
-        {
-            builder.HasKey(c => c.CertificationId);
+        builder.HasKey(x => x.CertificationId);
 
-            builder.Property(c => c.CertificateName)
-                .IsRequired()
-                .HasMaxLength(200);
+        builder.Property(x => x.CertificateName)
+            .IsRequired()
+            .HasMaxLength(200);
 
-            builder.Property(c => c.IssuingOrganization)
-                .IsRequired()
-                .HasMaxLength(200);
+        builder.Property(x => x.IssuingOrganization)
+            .IsRequired()
+            .HasMaxLength(200);
 
-            builder.Property(c => c.IssueDate)
-                .IsRequired();
+        builder.Property(x => x.IssueDate)
+            .IsRequired();
 
-            builder.Property(c => c.CredentialUrl)
-                .HasMaxLength(500);
+        builder.Property(x => x.CredentialUrl)
+            .HasMaxLength(500);
 
-            builder.HasOne<StudentProfile>()
-                .WithMany()
-                .HasForeignKey(c => c.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+        builder.HasOne<StudentProfile>()
+            .WithMany()
+            .HasForeignKey(x => x.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

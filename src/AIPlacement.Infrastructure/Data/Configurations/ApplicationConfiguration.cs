@@ -1,14 +1,15 @@
 using AIPlacement.Domain.Entities.Jobs;
+using AIPlacement.Domain.Entities.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ApplicationEntity = AIPlacement.Domain.Entities.Applications.Application;
 
 namespace AIPlacement.Infrastructure.Data.Configurations;
 
 public class ApplicationConfiguration
-    : IEntityTypeConfiguration<AIPlacement.Domain.Entities.Applications.Application>
+    : IEntityTypeConfiguration<ApplicationEntity>
 {
-    public void Configure(
-        EntityTypeBuilder<AIPlacement.Domain.Entities.Applications.Application> builder)
+    public void Configure(EntityTypeBuilder<ApplicationEntity> builder)
     {
         builder.HasKey(x => x.ApplicationId);
 
@@ -16,15 +17,22 @@ public class ApplicationConfiguration
             .IsRequired();
 
         builder.Property(x => x.CurrentStatus)
-            .HasMaxLength(50);
+            .HasMaxLength(30);
 
-        builder.Property(x => x.RecruiterRemarks);
+        builder.Property(x => x.RecruiterRemarks)
+            .HasMaxLength(500);
 
-    
+        builder.HasOne<StudentProfile>()
+            .WithMany()
+            .HasForeignKey(x => x.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<JobDrive>()
             .WithMany()
             .HasForeignKey(x => x.JobDriveId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x => new { x.StudentId, x.JobDriveId })
+            .IsUnique();
     }
 }
