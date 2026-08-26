@@ -27,49 +27,183 @@ using AIPlacement.Infrastructure.Projects;
 using AIPlacement.Infrastructure.Resumes;
 using AIPlacement.Infrastructure.Skills;
 using AIPlacement.Infrastructure.Students;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ===============================
+// Controllers
+// ===============================
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IResumeService, ResumeService>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddEndpointsApiExplorer();
+
+// ===============================
+// Swagger + JWT Authorize Button
+// ===============================
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// ===============================
+// JWT Authentication
+// ===============================
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "JWT signing key is missing from configuration.");
+}
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer =
+                    builder.Configuration["Jwt:Issuer"],
+
+                ValidAudience =
+                    builder.Configuration["Jwt:Audience"],
+
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtKey)),
+
+                ClockSkew = TimeSpan.Zero
+            };
+    });
+
+// ===============================
+// Database
+// ===============================
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString(
+            "DefaultConnection")));
 
+// ===============================
+// Student
+// ===============================
+
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
+// ===============================
+// Resume
+// ===============================
+
+builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
+
+// ===============================
+// Company
+// ===============================
+
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+
+// ===============================
+// Job Drives
+// ===============================
+
 builder.Services.AddScoped<IJobDriveRepository, JobDriveRepository>();
 builder.Services.AddScoped<IJobDriveService, JobDriveService>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
+// ===============================
+// Skills
+// ===============================
+
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
-builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
+
+// ===============================
+// Certifications
+// ===============================
+
 builder.Services.AddScoped<ICertificationService, CertificationService>();
 builder.Services.AddScoped<ICertificationRepository, CertificationRepository>();
+
+// ===============================
+// Projects
+// ===============================
+
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
+// ===============================
 // Admin + Analytics (Pair 3)
+// ===============================
+
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
 builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IPlacementService, PlacementService>();
+
+// ===============================
+// Recruitment
+// ===============================
+
 builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ===============================
+// HTTP Pipeline
+// ===============================
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -78,6 +212,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// IMPORTANT: Authentication before Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
