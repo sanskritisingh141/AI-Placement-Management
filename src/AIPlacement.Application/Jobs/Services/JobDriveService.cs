@@ -42,6 +42,7 @@ public class JobDriveService : IJobDriveService
     public async Task<JobDriveDto> CreateAsync(CreateJobDriveDto request)
     {
         ValidateRequest(request);
+        await ValidateReferencesAsync(request.CompanyId, request.RequiredSkillIds);
 
         var jobDrive = new JobDrive
         {
@@ -105,6 +106,8 @@ public class JobDriveService : IJobDriveService
         if (jobDrive.Status == JobDriveStatus.Closed)
             throw new InvalidOperationException("A closed job drive cannot be edited.");
 
+        await ValidateSkillIdsAsync(request.RequiredSkillIds);
+
         jobDrive.JobTitle = request.JobTitle.Trim();
         jobDrive.JobDescription = request.JobDescription.Trim();
         jobDrive.Location = request.Location.Trim();
@@ -160,6 +163,12 @@ public class JobDriveService : IJobDriveService
             throw new InvalidOperationException(
                 "Only an admin-approved job drive can be published.");
         }
+
+        if (jobDrive.Status == JobDriveStatus.Closed)
+            throw new InvalidOperationException("A closed job drive cannot be published again.");
+
+        if (jobDrive.ApplicationDeadline <= DateTime.UtcNow)
+            throw new InvalidOperationException("An expired job drive cannot be published.");
 
         jobDrive.Status = JobDriveStatus.Open;
         await _jobDriveRepository.UpdateJobDriveAsync(jobDrive);
@@ -247,6 +256,8 @@ public class JobDriveService : IJobDriveService
         if (request.CompanyId <= 0)
             throw new ArgumentException("A valid company ID is required.");
 
+        ValidateRequiredSkillIds(request.RequiredSkillIds);
+
         ValidateCommonFields(
             request.JobTitle,
             request.JobDescription,
@@ -260,6 +271,8 @@ public class JobDriveService : IJobDriveService
 
     private static void ValidateRequest(UpdateJobDriveDto request)
     {
+        ValidateRequiredSkillIds(request.RequiredSkillIds);
+
         ValidateCommonFields(
             request.JobTitle,
             request.JobDescription,
@@ -284,11 +297,17 @@ public class JobDriveService : IJobDriveService
         if (string.IsNullOrWhiteSpace(jobTitle))
             throw new ArgumentException("Job title is required.");
 
+        if (jobTitle.Trim().Length > 150)
+            throw new ArgumentException("Job title cannot exceed 150 characters.");
+
         if (string.IsNullOrWhiteSpace(jobDescription))
             throw new ArgumentException("Job description is required.");
 
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location is required.");
+
+        if (location.Trim().Length > 150)
+            throw new ArgumentException("Location cannot exceed 150 characters.");
 
         if (minCgpa < 0 || minCgpa > 10)
             throw new ArgumentException("Minimum CGPA must be between 0 and 10.");
@@ -304,5 +323,43 @@ public class JobDriveService : IJobDriveService
 
         if (applicationDeadline <= DateTime.UtcNow)
             throw new ArgumentException("Application deadline must be in the future.");
+    }
+
+    private static void ValidateRequiredSkillIds(IReadOnlyList<int>? requiredSkillIds)
+    {
+        if (requiredSkillIds is null || requiredSkillIds.Count == 0)
+            throw new ArgumentException("At least one required skill is required.");
+
+        if (requiredSkillIds.Any(skillId => skillId <= 0))
+            throw new ArgumentException("Required skill IDs must be positive.");
+    }
+
+    private async Task ValidateReferencesAsync(
+        int companyId,
+        IReadOnlyList<int> requiredSkillIds)
+    {
+        if (!await _jobDriveRepository.CompanyExistsAsync(companyId))
+            throw new ArgumentException("Company not found.");
+
+        await ValidateSkillIdsAsync(requiredSkillIds);
+    }
+
+    private async Task ValidateSkillIdsAsync(IReadOnlyList<int> requiredSkillIds)
+    {
+        var requestedIds = requiredSkillIds.Distinct().ToHashSet();
+        var existingIds = (await _jobDriveRepository
+            .GetExistingSkillIdsAsync(requestedIds))
+            .ToHashSet();
+
+        var missingIds = requestedIds
+            .Where(skillId => !existingIds.Contains(skillId))
+            .OrderBy(skillId => skillId)
+            .ToList();
+
+        if (missingIds.Count > 0)
+        {
+            throw new ArgumentException(
+                $"Skill IDs not found: {string.Join(", ", missingIds)}.");
+        }
     }
 }
