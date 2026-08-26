@@ -59,6 +59,23 @@ public class JobDriveRepository : IJobDriveRepository
             .ToListAsync();
     }
 
+    public async Task<bool> CompanyExistsAsync(int companyId)
+    {
+        return await _dbContext.CompanyProfiles
+            .AnyAsync(company => company.CompanyId == companyId);
+    }
+
+    public async Task<IReadOnlyList<int>> GetExistingSkillIdsAsync(
+        IEnumerable<int> skillIds)
+    {
+        var ids = skillIds.Distinct().ToList();
+
+        return await _dbContext.Skills
+            .Where(skill => ids.Contains(skill.SkillId))
+            .Select(skill => skill.SkillId)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<EligibilityCriteria>> GetEligibilityCriteriaBatchAsync(
         IEnumerable<int> jobDriveIds)
     {

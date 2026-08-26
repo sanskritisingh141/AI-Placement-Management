@@ -12,6 +12,9 @@ public interface IJobDriveRepository
     Task<IReadOnlyList<JobSkill>> GetJobSkillsAsync(int jobDriveId);
     Task<IReadOnlyList<JobEligibleBranch>> GetEligibleBranchesAsync(int jobDriveId);
 
+    Task<bool> CompanyExistsAsync(int companyId);
+    Task<IReadOnlyList<int>> GetExistingSkillIdsAsync(IEnumerable<int> skillIds);
+
     Task<IReadOnlyList<EligibilityCriteria>> GetEligibilityCriteriaBatchAsync(IEnumerable<int> jobDriveIds);
     Task<IReadOnlyList<JobSkill>> GetJobSkillsBatchAsync(IEnumerable<int> jobDriveIds);
     Task<IReadOnlyList<JobEligibleBranch>> GetEligibleBranchesBatchAsync(IEnumerable<int> jobDriveIds);
