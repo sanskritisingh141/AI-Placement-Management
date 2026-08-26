@@ -1,16 +1,27 @@
-using AIPlacement.Infrastructure.Company;
-using AIPlacement.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using AIPlacement.Application.Company.Interfaces;
-using AIPlacement.Application.Company.Services;
-using AIPlacement.Application.Students.Interfaces;
-using AIPlacement.Application.Students.Services;
-using AIPlacement.Application.Resumes.Interfaces;
-using AIPlacement.Application.Resumes.Services;
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Certifications.Interfaces;
+using AIPlacement.Application.Certifications.Services;
+using AIPlacement.Application.Company.Interfaces;
+using AIPlacement.Application.Company.Services;
 using AIPlacement.Application.Placements.Interfaces;
 using AIPlacement.Application.Placements.Services;
+using AIPlacement.Application.Projects.Interfaces;
+using AIPlacement.Application.Projects.Services;
+using AIPlacement.Application.Resumes.Interfaces;
+using AIPlacement.Application.Resumes.Services;
+using AIPlacement.Application.Skills.Interfaces;
+using AIPlacement.Application.Skills.Services;
+using AIPlacement.Application.Students.Interfaces;
+using AIPlacement.Application.Students.Services;
+using AIPlacement.Infrastructure.Certifications;
+using AIPlacement.Infrastructure.Company;
+using AIPlacement.Infrastructure.Data;
+using AIPlacement.Infrastructure.Projects;
+using AIPlacement.Infrastructure.Resumes;
+using AIPlacement.Infrastructure.Skills;
+using AIPlacement.Infrastructure.Students;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +40,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
+builder.Services.AddScoped<ICertificationService, CertificationService>();
+builder.Services.AddScoped<ICertificationRepository, CertificationRepository>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
 // Admin + Analytics (Pair 3)
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();

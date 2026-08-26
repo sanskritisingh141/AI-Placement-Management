@@ -1,32 +1,86 @@
 ﻿using AIPlacement.Application.Resumes.DTOs;
 using AIPlacement.Application.Resumes.Interfaces;
+using AIPlacement.Domain.Entities.Resumes;
 
 namespace AIPlacement.Application.Resumes.Services;
 
 public class ResumeService : IResumeService
 {
-    public Task<ResumeDto?> GetByIdAsync(int resumeId)
+    private readonly IResumeRepository _resumeRepository;
+
+    public ResumeService(IResumeRepository resumeRepository)
     {
-        throw new NotImplementedException();
+        _resumeRepository = resumeRepository;
     }
 
-    public Task<IEnumerable<ResumeDto>> GetByStudentIdAsync(int studentId)
+    public async Task<ResumeDto?> GetByIdAsync(int resumeId)
     {
-        throw new NotImplementedException();
+        return await _resumeRepository.GetByIdAsync(resumeId);
     }
 
-    public Task<ResumeDto> CreateAsync(ResumeDto resume)
+    public async Task<IEnumerable<ResumeDto>> GetByStudentIdAsync(int studentId)
     {
-        throw new NotImplementedException();
+        return await _resumeRepository.GetByStudentIdAsync(studentId);
     }
 
-    public Task<ResumeDto?> UpdateAsync(int resumeId, ResumeDto resume)
+    public async Task<ResumeDto> CreateAsync(ResumeDto resume)
     {
-        throw new NotImplementedException();
+        var entity = new Resume
+        {
+            StudentId = resume.StudentId,
+            FileName = resume.FileName ?? string.Empty,
+            FilePath = resume.FilePath ?? string.Empty,
+            UploadedAt = resume.UploadedAt ?? DateTime.UtcNow,
+            VersionNo = resume.VersionNo ?? 1,
+            IsCurrent = resume.IsCurrent ?? true
+        };
+
+        var created = await _resumeRepository.CreateAsync(entity);
+
+        return MapToDto(created);
     }
 
-    public Task<bool> DeleteAsync(int resumeId)
+    public async Task<ResumeDto?> UpdateAsync(
+        int resumeId,
+        ResumeDto resume)
     {
-        throw new NotImplementedException();
+        var entity = new Resume
+        {
+            ResumeId = resumeId,
+            StudentId = resume.StudentId,
+            FileName = resume.FileName ?? string.Empty,
+            FilePath = resume.FilePath ?? string.Empty,
+            UploadedAt = resume.UploadedAt ?? DateTime.UtcNow,
+            VersionNo = resume.VersionNo ?? 1,
+            IsCurrent = resume.IsCurrent ?? true
+        };
+
+        var updated = await _resumeRepository.UpdateAsync(
+            resumeId,
+            entity);
+
+        if (updated == null)
+            return null;
+
+        return MapToDto(updated);
+    }
+
+    public async Task<bool> DeleteAsync(int resumeId)
+    {
+        return await _resumeRepository.DeleteAsync(resumeId);
+    }
+
+    private static ResumeDto MapToDto(Resume resume)
+    {
+        return new ResumeDto
+        {
+            ResumeId = resume.ResumeId,
+            StudentId = resume.StudentId,
+            FileName = resume.FileName,
+            FilePath = resume.FilePath,
+            UploadedAt = resume.UploadedAt,
+            VersionNo = resume.VersionNo,
+            IsCurrent = resume.IsCurrent
+        };
     }
 }

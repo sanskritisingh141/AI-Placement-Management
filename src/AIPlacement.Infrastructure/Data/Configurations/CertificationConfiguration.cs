@@ -9,25 +9,25 @@ public class CertificationConfiguration
 {
     public void Configure(EntityTypeBuilder<Certification> builder)
     {
-        builder.HasKey(x => x.CertificationId);
+        builder.HasKey(c => c.CertificationId);
 
-        builder.Property(x => x.CertificateName)
+        builder.Property(c => c.CertificateName)
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(x => x.IssuingOrganization)
+        builder.Property(c => c.IssuingOrganization)
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(x => x.IssueDate)
+        builder.Property(c => c.IssueDate)
             .IsRequired();
 
-        builder.Property(x => x.CredentialUrl)
+        builder.Property(c => c.CredentialUrl)
             .HasMaxLength(500);
 
         builder.HasOne<StudentProfile>()
             .WithMany()
-            .HasForeignKey(x => x.StudentId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(c => c.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

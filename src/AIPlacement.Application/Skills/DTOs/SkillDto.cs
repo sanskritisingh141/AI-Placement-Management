@@ -6,7 +6,7 @@ public class SkillDto
 
     public int StudentId { get; set; }
 
-    public string SkillName { get; set; }
+    public string SkillName { get; set; } = string.Empty;
 
-    public string ProficiencyLevel { get; set; }
+    public string ProficiencyLevel { get; set; } = string.Empty;
 }
