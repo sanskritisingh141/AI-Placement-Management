@@ -14,6 +14,12 @@ using AIPlacement.Application.Skills.Interfaces;
 using AIPlacement.Application.Skills.Services;
 using AIPlacement.Application.Students.Interfaces;
 using AIPlacement.Application.Students.Services;
+using AIPlacement.Application.Jobs.Interfaces;
+using AIPlacement.Application.Jobs.Services;
+using AIPlacement.Infrastructure.Jobs;
+using AIPlacement.Application.Recruitment.Interfaces;
+using AIPlacement.Application.Recruitment.Services;
+using AIPlacement.Infrastructure.Recruitment;
 using AIPlacement.Infrastructure.Certifications;
 using AIPlacement.Infrastructure.Company;
 using AIPlacement.Infrastructure.Data;
@@ -40,6 +46,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IJobDriveRepository, JobDriveRepository>();
+builder.Services.AddScoped<IJobDriveService, JobDriveService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
@@ -56,6 +64,8 @@ builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IPlacementService, PlacementService>();
+builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
+builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
 var app = builder.Build();
 
