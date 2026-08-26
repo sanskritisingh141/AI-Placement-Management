@@ -1,0 +1,135 @@
+﻿@model AIPlacement.Application.Students.DTOs.StudentDto
+
+@{
+    ViewData["Title"] = "Student Profile";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Student Profile</h1>
+            <p class="text-muted">
+                View your academic and personal information.
+            </p>
+        </div>
+
+        <div>
+            <a asp-controller="Student"
+               asp-action="EditProfile"
+               asp-route-studentId="@Model.StudentId"
+               class="btn btn-primary">
+                Edit Profile
+            </a>
+
+            <a asp-controller="Student"
+               asp-action="Skills"
+               asp-route-studentId="@Model.StudentId"
+               class="btn btn-outline-primary ms-2">
+                Manage Skills
+            </a>
+
+            <a asp-controller="Student"
+               asp-action="Dashboard"
+               asp-route-studentId="@Model.StudentId"
+               class="btn btn-outline-primary ms-2">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="mb-4">Personal Information</h4>
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Student ID
+                    </label>
+                    <p>@Model.StudentId</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        User ID
+                    </label>
+                    <p>@Model.UserId</p>
+                </div>
+
+            </div>
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Roll Number
+                    </label>
+                    <p>
+                        @(Model.RollNo ?? "Not provided")
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Branch
+                    </label>
+                    <p>
+                        @(Model.Branch ?? "Not provided")
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        CGPA
+                    </label>
+                    <p>
+                        @(Model.CGPA?.ToString("0.00") ?? "Not provided")
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Graduation Year
+                    </label>
+                    <p>
+                        @(Model.GraduationYear?.ToString()
+                            ?? "Not provided")
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Phone
+                    </label>
+                    <p>
+                        @(Model.Phone ?? "Not provided")
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Date of Birth
+                    </label>
+                    <p>
+                        @(Model.DateOfBirth?.ToString("dd MMM yyyy")
+                            ?? "Not provided")
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

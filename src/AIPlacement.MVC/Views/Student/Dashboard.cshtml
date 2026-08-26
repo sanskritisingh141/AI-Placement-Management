@@ -1,0 +1,137 @@
+﻿@using AIPlacement.Application.Students.DTOs
+@using AIPlacement.Application.Skills.DTOs
+@using AIPlacement.Application.Projects.DTOs
+@using AIPlacement.Application.Certifications.DTOs
+@using AIPlacement.Application.Resumes.DTOs
+
+@model StudentDto
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+
+    var skills = ViewBag.Skills as IEnumerable<SkillDto>
+                  ?? Enumerable.Empty<SkillDto>();
+
+    var projects = ViewBag.Projects as IEnumerable<ProjectDto>
+                   ?? Enumerable.Empty<ProjectDto>();
+
+    var certifications = ViewBag.Certifications as IEnumerable<CertificationDto>
+                         ?? Enumerable.Empty<CertificationDto>();
+
+    var resumes = ViewBag.Resumes as IEnumerable<ResumeDto>
+                  ?? Enumerable.Empty<ResumeDto>();
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h1>Student Dashboard</h1>
+        <p class="text-muted">
+            Welcome to your placement dashboard.
+        </p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Profile</h4>
+
+                    <p>
+                        <strong>Student ID:</strong>
+                        @Model.StudentId
+                    </p>
+
+                    <a asp-controller="Student"
+                       asp-action="Profile"
+                       asp-route-studentId="@Model.StudentId"
+                       class="btn btn-primary">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Skills</h4>
+
+                    <p>
+                        <strong>Total Skills:</strong>
+                        @skills.Count()
+                    </p>
+
+                    <a asp-controller="Student"
+                       asp-action="Skills"
+                       asp-route-studentId="@Model.StudentId"
+                       class="btn btn-primary">
+                        Manage Skills
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Projects</h4>
+
+                    <p>
+                        <strong>Total Projects:</strong>
+                        @projects.Count()
+                    </p>
+
+                    <a asp-controller="Student"
+                       asp-action="Projects"
+                       asp-route-studentId="@Model.StudentId"
+                       class="btn btn-primary">
+                        Manage Projects
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Certifications</h4>
+
+                    <p>
+                        <strong>Total Certifications:</strong>
+                        @certifications.Count()
+                    </p>
+
+                    <a asp-controller="Student"
+                       asp-action="Certifications"
+                       asp-route-studentId="@Model.StudentId"
+                       class="btn btn-primary">
+                        Manage Certifications
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">Resume</h4>
+
+                    <p>
+                        <strong>Total Resumes:</strong>
+                        @resumes.Count()
+                    </p>
+
+                    <a asp-controller="Student"
+                       asp-action="Resume"
+                       asp-route-studentId="@Model.StudentId"
+                       class="btn btn-primary">
+                        Manage Resume
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
