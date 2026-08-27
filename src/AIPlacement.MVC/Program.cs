@@ -1,7 +1,8 @@
-using AllPlacement.MVC.Data;
-using Microsoft.EntityFrameworkCore;
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Jobs.Services;
+using AllPlacement.MVC.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,9 @@ builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IEligibilityCriteriaService, EligibilityCriteriaService>();
+builder.Services.AddScoped<IJobEligibleBranchService, JobEligibleBranchService>();
+
 
 var app = builder.Build();
 
