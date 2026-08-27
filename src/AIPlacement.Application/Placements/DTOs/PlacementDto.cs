@@ -6,6 +6,8 @@ public class PlacementDto
 
     public int StudentId { get; set; }
 
+    public int ApplicationId { get; set; }
+
     public string StudentName { get; set; } = string.Empty;
 
     public string? RollNo { get; set; }

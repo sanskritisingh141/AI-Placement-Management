@@ -1,0 +1,12 @@
+namespace AIPlacement.Application.Authentication.DTOs;
+
+public class AuthUserRecord
+{
+    public int UserId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public int? ProfileId { get; set; }
+}

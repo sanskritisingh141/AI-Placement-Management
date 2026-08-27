@@ -10,6 +10,8 @@ public interface IRecruitmentService
 
     Task<IReadOnlyList<ApplicantDto>> GetApplicantsAsync(int jobDriveId);
 
+    Task<IReadOnlyList<ApplicantDto>> GetStudentApplicationsAsync(int studentId);
+
     Task<ApplicantDto?> UpdateApplicationStatusAsync(
         int applicationId,
         UpdateApplicationStatusDto request);
@@ -23,4 +25,6 @@ public interface IRecruitmentService
     Task<InterviewResultDto?> RecordInterviewResultAsync(
         int interviewId,
         RecordInterviewResultDto request);
+    Task<IReadOnlyList<InterviewRoundDto>> GetInterviewRoundsAsync(int jobDriveId);
+    Task<IReadOnlyList<InterviewScheduleDto>> GetInterviewSchedulesAsync(int jobDriveId);
 }

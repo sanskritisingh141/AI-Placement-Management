@@ -11,6 +11,8 @@ public interface IResumeRepository
 
     Task<Resume> CreateAsync(Resume resume);
 
+    Task<Resume> AddVersionAsync(int studentId, string fileName, string filePath);
+
     Task<Resume?> UpdateAsync(
         int resumeId,
         Resume resume);

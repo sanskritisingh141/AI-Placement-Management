@@ -54,6 +54,13 @@ public class RecruitmentService : IRecruitmentService
                 result.Reasons.Add(
                     $"Graduation year {student.GraduationYear} does not match the required year {criteria.GraduationYear}.");
             }
+
+            if (student.CurrentBacklogs > criteria.MaxBacklogs)
+            {
+                result.IsEligible = false;
+                result.Reasons.Add(
+                    $"Current backlogs {student.CurrentBacklogs} exceed the allowed maximum of {criteria.MaxBacklogs}.");
+            }
         }
 
         if (eligibleBranches.Count > 0)
@@ -79,6 +86,15 @@ public class RecruitmentService : IRecruitmentService
         {
             result.IsEligible = false;
             result.Reasons.Add("Application deadline has passed.");
+        }
+
+        var missingSkills = await _recruitmentRepository
+            .GetMissingRequiredSkillsAsync(studentId, jobDriveId);
+        if (missingSkills.Count > 0)
+        {
+            result.IsEligible = false;
+            result.Reasons.Add(
+                $"Missing required skills: {string.Join(", ", missingSkills)}.");
         }
 
         return result;
@@ -131,19 +147,11 @@ public class RecruitmentService : IRecruitmentService
 
     public async Task<IReadOnlyList<ApplicantDto>> GetApplicantsAsync(int jobDriveId)
     {
-        var applications = await _recruitmentRepository
-            .GetApplicationsByJobDriveIdAsync(jobDriveId);
-
-        var matchScores = await _recruitmentRepository
-            .GetMatchScoresByJobDriveAsync(jobDriveId);
-
-        var scoresByStudent = matchScores.ToDictionary(m => m.StudentId, m => m.MatchScore);
-
-        return applications.Select(a => MapApplicant(
-            a,
-            scoresByStudent.GetValueOrDefault(a.StudentId)
-        )).ToList();
+        return await _recruitmentRepository.GetApplicantDetailsByJobDriveIdAsync(jobDriveId);
     }
+
+    public Task<IReadOnlyList<ApplicantDto>> GetStudentApplicationsAsync(int studentId) =>
+        _recruitmentRepository.GetApplicationsByStudentIdAsync(studentId);
 
     public async Task<ApplicantDto?> UpdateApplicationStatusAsync(
         int applicationId,
@@ -339,6 +347,12 @@ public class RecruitmentService : IRecruitmentService
             EvaluatedAt = interviewResult.EvaluatedAt
         };
     }
+
+    public Task<IReadOnlyList<InterviewRoundDto>> GetInterviewRoundsAsync(int jobDriveId) =>
+        _recruitmentRepository.GetInterviewRoundsAsync(jobDriveId);
+
+    public Task<IReadOnlyList<InterviewScheduleDto>> GetInterviewSchedulesAsync(int jobDriveId) =>
+        _recruitmentRepository.GetInterviewSchedulesAsync(jobDriveId);
 
     private static ApplicantDto MapApplicant(
         ApplicationEntity application,

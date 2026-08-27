@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIPlacement.API\AIPlacement.API.csproj" />
+    <ProjectReference Include="..\AIPlacement.Application\AIPlacement.Application.csproj" />
+    <ProjectReference Include="..\AIPlacement.Infrastructure\AIPlacement.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

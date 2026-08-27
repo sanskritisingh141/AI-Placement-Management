@@ -750,6 +750,9 @@ namespace AIPlacement.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentBacklogs")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -1078,7 +1081,7 @@ namespace AIPlacement.Infrastructure.Migrations
                     b.HasOne("AIPlacement.Domain.Entities.Students.StudentProfile", null)
                         .WithMany()
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

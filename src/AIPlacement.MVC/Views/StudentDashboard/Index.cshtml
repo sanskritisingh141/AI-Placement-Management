@@ -1,0 +1,82 @@
+@model AIPlacement.MVC.Models.Student.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<section class="dashboard-hero mb-4">
+    <div>
+        <h1>Welcome back, @Model.StudentName! 👋</h1>
+        <p>Track your placement readiness and explore new opportunities.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">🎓</div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="metric-card"><span class="metric-icon">◯</span><div><small>Profile Completion</small><strong>@Model.ProfileCompletion%</strong></div><div class="progress mt-3"><div class="progress-bar" style="width:@Model.ProfileCompletion%"></div></div></div>
+    </div>
+    <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon mint">⌨</span><div><small>Skills Added</small><strong>@Model.Skills.Count</strong></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon">▣</span><div><small>Projects</small><strong>@Model.Projects.Count</strong></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon purple">◎</span><div><small>Certifications</small><strong>@Model.Certifications.Count</strong></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <section class="content-card mb-4">
+            <div class="section-heading"><h2>My Profile Summary</h2><a class="btn btn-outline-primary btn-sm" asp-controller="StudentProfile" asp-action="Edit">Edit Profile</a></div>
+            <div class="profile-heading">
+                <div class="avatar-lg">@Model.StudentName[..1].ToUpperInvariant()</div>
+                <div><h3>@Model.StudentName</h3><p>@Model.Profile.Branch · Graduating @Model.Profile.GraduationYear</p></div>
+            </div>
+            <div class="profile-grid">
+                <div><small>Roll Number</small><strong>@Model.Profile.RollNo</strong></div>
+                <div><small>CGPA</small><strong>@Model.Profile.CGPA</strong></div>
+                <div><small>Graduation Year</small><strong>@Model.Profile.GraduationYear</strong></div>
+                <div><small>Current Backlogs</small><strong>@Model.Profile.CurrentBacklogs</strong></div>
+                <div><small>Email</small><strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</strong></div>
+                <div><small>Phone</small><strong>@(Model.Profile.Phone ?? "Not provided")</strong></div>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <div class="section-heading"><h2>My Skills</h2><a asp-controller="StudentSkills" asp-action="Index">View all</a></div>
+            <div class="skill-grid">
+                @if (Model.Skills.Count == 0)
+                {
+                    <p class="text-muted">Add skills to improve your job matches.</p>
+                }
+                @foreach (var skill in Model.Skills.Take(8))
+                {
+                    <div class="skill-chip"><strong>@skill.SkillName</strong><span>@skill.ProficiencyLevel</span></div>
+                }
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-4">
+        <section class="content-card mb-4">
+            <div class="section-heading"><h2>Quick Actions</h2></div>
+            <div class="quick-actions">
+                <a asp-controller="StudentSkills" asp-action="Index">Update Skills <span>›</span></a>
+                <a asp-controller="StudentProjects" asp-action="Index">Add Project <span>›</span></a>
+                <a asp-controller="StudentResumes" asp-action="Index">Upload Resume <span>›</span></a>
+                <a asp-controller="StudentJobs" asp-action="Index">Explore Job Drives <span>›</span></a>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <div class="section-heading"><h2>Recent Applications</h2><a asp-controller="StudentApplications" asp-action="Index">View all</a></div>
+            @if (Model.RecentApplications.Count == 0)
+            {
+                <p class="text-muted">You have not applied to a job yet.</p>
+            }
+            @foreach (var application in Model.RecentApplications)
+            {
+                <div class="application-row">
+                    <div><strong>@application.CompanyName</strong><span>@application.JobTitle</span></div>
+                    <span class="status-pill">@application.CurrentStatus</span>
+                </div>
+            }
+        </section>
+    </div>
+</div>

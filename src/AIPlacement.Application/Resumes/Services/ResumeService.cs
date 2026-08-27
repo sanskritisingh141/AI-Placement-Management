@@ -40,6 +40,23 @@ public class ResumeService : IResumeService
         return MapToDto(created);
     }
 
+    public async Task<ResumeDto> AddVersionAsync(
+        int studentId,
+        string fileName,
+        string filePath)
+    {
+        if (studentId <= 0)
+            throw new ArgumentException("A valid student ID is required.");
+
+        if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("Resume file information is required.");
+
+        return MapToDto(await _resumeRepository.AddVersionAsync(
+            studentId,
+            fileName.Trim(),
+            filePath.Trim()));
+    }
+
     public async Task<ResumeDto?> UpdateAsync(
         int resumeId,
         ResumeDto resume)

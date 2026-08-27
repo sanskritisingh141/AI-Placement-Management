@@ -42,6 +42,7 @@ public class StudentService : IStudentService
             Branch = student.Branch ?? string.Empty,
             CGPA = student.CGPA ?? 0,
             GraduationYear = student.GraduationYear ?? 0,
+            CurrentBacklogs = student.CurrentBacklogs ?? 0,
             Phone = student.Phone,
             DateOfBirth = student.DateOfBirth,
             CreatedAt = DateTime.UtcNow
@@ -64,6 +65,7 @@ public class StudentService : IStudentService
             Branch = student.Branch ?? string.Empty,
             CGPA = student.CGPA ?? 0,
             GraduationYear = student.GraduationYear ?? 0,
+            CurrentBacklogs = student.CurrentBacklogs ?? 0,
             Phone = student.Phone,
             DateOfBirth = student.DateOfBirth
         };
@@ -92,6 +94,7 @@ public class StudentService : IStudentService
             Branch = student.Branch,
             CGPA = student.CGPA,
             GraduationYear = student.GraduationYear,
+            CurrentBacklogs = student.CurrentBacklogs,
             Phone = student.Phone,
             DateOfBirth = student.DateOfBirth
         };

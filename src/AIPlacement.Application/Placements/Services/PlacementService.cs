@@ -1,4 +1,4 @@
-﻿using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Placements.DTOs;
 using AIPlacement.Application.Placements.Interfaces;
 
@@ -6,24 +6,26 @@ namespace AIPlacement.Application.Placements.Services;
 
 public class PlacementService : IPlacementService
 {
-    public Task<IReadOnlyList<PlacementDto>> GetAllPlacementsAsync()
+    private readonly IAdminRepository _repository;
+
+    public PlacementService(IAdminRepository repository)
     {
-        var placements = AdminMockDataStore.Placements
-            .Select(MapToDto)
-            .ToList();
-
-        IReadOnlyList<PlacementDto> result = placements;
-
-        return Task.FromResult(result);
+        _repository = repository;
     }
 
-    public Task<PlacementDto?> GetPlacementByIdAsync(int placementId)
+    public async Task<IReadOnlyList<PlacementDto>> GetAllPlacementsAsync()
     {
-        var placement = AdminMockDataStore.Placements
-            .FirstOrDefault(p => p.PlacementId == placementId);
+        return (await _repository.GetPlacementsAsync())
+            .Select(MapToDto)
+            .ToList();
+    }
 
-        return Task.FromResult(
-            placement == null ? null : MapToDto(placement));
+    public async Task<PlacementDto?> GetPlacementByIdAsync(int placementId)
+    {
+        var placement = (await _repository.GetPlacementsAsync())
+            .FirstOrDefault(item => item.PlacementId == placementId);
+
+        return placement is null ? null : MapToDto(placement);
     }
 
     private static PlacementDto MapToDto(
@@ -33,6 +35,7 @@ public class PlacementService : IPlacementService
         {
             PlacementId = placement.PlacementId,
             StudentId = placement.StudentId,
+            ApplicationId = placement.ApplicationId,
             StudentName = placement.StudentName,
             RollNo = placement.RollNo,
             Branch = placement.Branch,

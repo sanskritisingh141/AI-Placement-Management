@@ -50,6 +50,7 @@ public class StudentRepository : IStudentRepository
         existing.Branch = student.Branch;
         existing.CGPA = student.CGPA;
         existing.GraduationYear = student.GraduationYear;
+        existing.CurrentBacklogs = student.CurrentBacklogs;
         existing.Phone = student.Phone;
         existing.DateOfBirth = student.DateOfBirth;
 

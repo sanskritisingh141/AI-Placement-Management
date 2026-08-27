@@ -1,5 +1,10 @@
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.AI.Interfaces;
+using AIPlacement.Application.AI.Services;
+using AIPlacement.Application.Authentication;
+using AIPlacement.Application.Authentication.Interfaces;
+using AIPlacement.Application.Authentication.Services;
 using AIPlacement.Application.Certifications.Interfaces;
 using AIPlacement.Application.Certifications.Services;
 using AIPlacement.Application.Company.Interfaces;
@@ -28,6 +33,10 @@ using AIPlacement.Infrastructure.Projects;
 using AIPlacement.Infrastructure.Resumes;
 using AIPlacement.Infrastructure.Skills;
 using AIPlacement.Infrastructure.Students;
+using AIPlacement.Infrastructure.Authentication;
+using AIPlacement.Infrastructure.Admin;
+using AIPlacement.Infrastructure.AI;
+using AIPlacement.API.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +132,15 @@ builder.Services
             };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("StudentOnly", policy => policy.RequireRole(RoleNames.Student));
+    options.AddPolicy("CompanyOnly", policy => policy.RequireRole(RoleNames.Company));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole(RoleNames.Admin));
+    options.AddPolicy("CompanyOrAdmin", policy =>
+        policy.RequireRole(RoleNames.Company, RoleNames.Admin));
+});
+
 // ===============================
 // Database
 // ===============================
@@ -131,6 +149,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString(
             "DefaultConnection")));
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IPasswordHashService, Pbkdf2PasswordHashService>();
+builder.Services.AddScoped<DatabaseIdentitySeeder>();
+builder.Services.AddSingleton<JwtTokenService>();
+builder.Services.AddScoped<IAIRepository, AIRepository>();
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddHttpClient<IAIAnalysisClient, FastApiAnalysisClient>(client =>
+{
+    var baseUrl = builder.Configuration["AIService:BaseUrl"] ?? "http://localhost:8000/";
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(60);
+});
 
 // ===============================
 // Student
@@ -189,7 +221,7 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 // Admin + Analytics (Pair 3)
 // ===============================
 
-builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
@@ -204,6 +236,14 @@ builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseIdentitySeeder>();
+    await seeder.SeedAsync(
+        builder.Configuration["SeedAdmin:Email"],
+        builder.Configuration["SeedAdmin:Password"]);
+}
 
 // ===============================
 // HTTP Pipeline

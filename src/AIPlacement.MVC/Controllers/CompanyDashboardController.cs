@@ -2,10 +2,14 @@ using AIPlacement.Application.Company.Interfaces;
 using AIPlacement.Application.Jobs;
 using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.MVC.Models.CompanyAndJob;
+using AIPlacement.Application.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AIPlacement.MVC.Controllers;
 
+[Authorize(Roles = RoleNames.Company)]
 public class CompanyDashboardController : Controller
 {
     private readonly ICompanyService _companyService;
@@ -20,16 +24,14 @@ public class CompanyDashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int? companyId)
+    public async Task<IActionResult> Index()
     {
-        // TODO: Replace companyId with the authenticated company's ID
-        // when shared role-based authentication is integrated.
-        if (companyId is null || companyId <= 0)
+        if (!int.TryParse(User.FindFirstValue("profile_id"), out var companyId))
         {
-            return BadRequest("A valid company ID is required.");
+            return Forbid();
         }
 
-        var company = await _companyService.GetByIdAsync(companyId.Value);
+        var company = await _companyService.GetByIdAsync(companyId);
 
         if (company is null)
         {
@@ -37,7 +39,7 @@ public class CompanyDashboardController : Controller
         }
 
         var jobDrives =
-            await _jobDriveService.GetByCompanyIdAsync(companyId.Value);
+            await _jobDriveService.GetByCompanyIdAsync(companyId);
 
         var model = new CompanyDashboardViewModel
         {

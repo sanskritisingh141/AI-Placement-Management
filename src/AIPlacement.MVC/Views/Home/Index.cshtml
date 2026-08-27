@@ -1,8 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Placement Management";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="row align-items-center py-5 g-5">
+    <div class="col-lg-6">
+        <span class="badge rounded-pill text-bg-primary mb-3">One connected placement platform</span>
+        <h1 class="display-3 fw-bold">Build skills. Find opportunities. Hire with confidence.</h1>
+        <p class="lead text-muted">AI Placement System connects students, recruiters, and placement administrators through one secure workflow—from profile readiness and intelligent job matching to interviews and placement reporting.</p>
+        <div class="d-flex gap-3 mt-4"><a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Create account</a><a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Sign in</a></div>
+    </div>
+    <div class="col-lg-6"><div class="card border-0 shadow-lg"><div class="card-body p-5"><h3>Everything in one place</h3><div class="vstack gap-4 mt-4"><div><strong>Students</strong><p class="text-muted mb-0">Build a complete profile, analyze resumes, discover eligible roles, and track applications.</p></div><div><strong>Companies</strong><p class="text-muted mb-0">Publish job drives, rank applicants, schedule interviews, and complete hiring.</p></div><div><strong>Administrators</strong><p class="text-muted mb-0">Approve opportunities, manage users, monitor recruitment, and export placement analytics.</p></div></div></div></div></div>
+</section>

@@ -58,6 +58,40 @@ public class ResumeRepository : IResumeRepository
         return resume;
     }
 
+    public async Task<Resume> AddVersionAsync(
+        int studentId,
+        string fileName,
+        string filePath)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var existing = await _context.Resumes
+            .Where(resume => resume.StudentId == studentId)
+            .ToListAsync();
+
+        foreach (var resume in existing)
+            resume.IsCurrent = false;
+
+        var version = existing.Count == 0
+            ? 1
+            : existing.Max(resume => resume.VersionNo) + 1;
+
+        var created = new Resume
+        {
+            StudentId = studentId,
+            FileName = fileName,
+            FilePath = filePath,
+            UploadedAt = DateTime.UtcNow,
+            VersionNo = version,
+            IsCurrent = true
+        };
+
+        _context.Resumes.Add(created);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return created;
+    }
+
     public async Task<Resume?> UpdateAsync(
         int resumeId,
         Resume resume)

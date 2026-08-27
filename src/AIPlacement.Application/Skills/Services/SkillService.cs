@@ -70,8 +70,8 @@ public class SkillService : ISkillService
             studentSkill);
     }
 
-    public async Task<bool> DeleteAsync(int skillId)
+    public async Task<bool> DeleteAsync(int studentId, int skillId)
     {
-        return await _skillRepository.DeleteAsync(skillId);
+        return await _skillRepository.DeleteStudentSkillAsync(studentId, skillId);
     }
 }
