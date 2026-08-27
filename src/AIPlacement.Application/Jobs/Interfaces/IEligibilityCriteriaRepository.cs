@@ -9,7 +9,8 @@ namespace AIPlacement.Application.Jobs.Interfaces
 {
     public interface IEligibilityCriteriaRepository
     {
-        Task<EligibilityCriteria> GetByJobDriveIdAsync(int jobDriveId);
+        Task<EligibilityCriteria?> GetByJobDriveIdAsync(int jobDriveId);
+        Task<EligibilityCriteria?> GetByIdAsync(int eligibilityId);
         Task AddAsync(EligibilityCriteria eligibilityCriteria);
         Task UpdateAsync(EligibilityCriteria eligibilityCriteria);
         Task DeleteAsync(int eligibilityId);

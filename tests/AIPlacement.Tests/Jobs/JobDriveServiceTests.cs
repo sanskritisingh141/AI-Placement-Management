@@ -41,6 +41,24 @@ public class JobDriveServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_RejectsMissingEligibleBranches()
+    {
+        var repository = new StubJobDriveRepository
+        {
+            CompanyExists = true,
+            ExistingSkillIds = [10]
+        };
+        var request = CreateRequest([10]);
+        request.EligibleBranches = [];
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            new JobDriveService(repository).CreateAsync(request));
+
+        Assert.Contains("eligible branch", exception.Message,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task CreateAsync_PersistsDistinctJobSkillsUsingExistingSkillIds()
     {
         var repository = new StubJobDriveRepository
@@ -86,6 +104,20 @@ public class JobDriveServiceTests
             new JobDriveService(repository).PublishAsync(100));
 
         Assert.Contains("expired", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(0, repository.UpdateJobDriveCount);
+    }
+
+    [Fact]
+    public async Task CloseAsync_RejectsJobDriveThatIsNotOpen()
+    {
+        var repository = new StubJobDriveRepository
+        {
+            JobDrive = ExistingJobDrive(JobDriveStatus.Draft)
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new JobDriveService(repository).CloseAsync(100));
+
         Assert.Equal(0, repository.UpdateJobDriveCount);
     }
 

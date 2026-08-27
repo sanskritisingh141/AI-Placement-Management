@@ -6,6 +6,7 @@ namespace AIPlacement.Application.Skills.Interfaces;
 
 public interface ISkillRepository
 {
+    Task<IReadOnlyList<SkillDto>> GetAllAsync();
     Task<SkillDto?> GetByIdAsync(int skillId);
 
     Task<IEnumerable<SkillDto>> GetByStudentIdAsync(int studentId);

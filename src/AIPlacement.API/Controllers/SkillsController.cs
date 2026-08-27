@@ -15,7 +15,14 @@ public class SkillsController : ControllerBase
         _skillService = skillService;
     }
 
-    [HttpGet("{skillId}")]
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<SkillDto>>> GetAll()
+    {
+        var skills = await _skillService.GetAllAsync();
+        return Ok(skills);
+    }
+
+    [HttpGet("{skillId:int}")]
     public async Task<ActionResult<SkillDto>> GetById(int skillId)
     {
         var skill = await _skillService.GetByIdAsync(skillId);

@@ -1,0 +1,126 @@
+@model AIPlacement.MVC.Models.CompanyAndJob.CompanyDashboardViewModel
+
+@{
+    ViewData["Title"] = "Company Dashboard";
+}
+
+<div class="mb-4">
+    <h1 class="display-6 fw-semibold">Company Dashboard</h1>
+    <p class="text-muted mb-0">
+        Welcome, @Model.CompanyName. Manage your company profile and job drives.
+    </p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Company Profile</h4>
+                <p class="card-text">
+                    <strong>Company ID:</strong> @Model.CompanyId
+                </p>
+
+                <a asp-controller="CompanyProfile"
+                   asp-action="Details"
+                   asp-route-companyId="@Model.CompanyId"
+                   class="btn btn-primary">
+                    View Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Job Drives</h4>
+                <p class="card-text">
+                    <strong>Total Job Drives:</strong> @Model.TotalJobDrives
+                </p>
+
+                <a asp-controller="JobDrives"
+                   asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   class="btn btn-primary">
+                    Manage Job Drives
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Draft Jobs</h4>
+                <p class="card-text">
+                    <strong>Total Drafts:</strong> @Model.DraftJobDrives
+                </p>
+
+                <a asp-controller="JobDrives"
+                   asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   asp-route-status="Draft"
+                   class="btn btn-outline-secondary">
+                    View Drafts
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Pending Approval</h4>
+                <p class="card-text">
+                    <strong>Pending Jobs:</strong> @Model.PendingApprovalJobDrives
+                </p>
+
+                <a asp-controller="JobDrives"
+                   asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   asp-route-approvalStatus="Pending"
+                   class="btn btn-outline-warning">
+                    View Pending
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Open Jobs</h4>
+                <p class="card-text">
+                    <strong>Published Jobs:</strong> @Model.OpenJobDrives
+                </p>
+
+                <a asp-controller="JobDrives"
+                   asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   asp-route-status="Open"
+                   class="btn btn-outline-success">
+                    View Open Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">Closed Jobs</h4>
+                <p class="card-text">
+                    <strong>Closed Jobs:</strong> @Model.ClosedJobDrives
+                </p>
+
+                <a asp-controller="JobDrives"
+                   asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   asp-route-status="Closed"
+                   class="btn btn-outline-dark">
+                    View Closed Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

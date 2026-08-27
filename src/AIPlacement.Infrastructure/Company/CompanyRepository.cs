@@ -20,6 +20,18 @@ public class CompanyRepository : ICompanyRepository
             .FirstOrDefaultAsync(x => x.CompanyId == companyId);
     }
 
+    public async Task<CompanyProfile?> GetByUserIdAsync(int userId)
+    {
+        return await _context.CompanyProfiles
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+    }
+
+    public Task<bool> UserExistsAsync(int userId) =>
+        _context.Users.AnyAsync(user => user.UserId == userId);
+
+    public Task<bool> HasJobDrivesAsync(int companyId) =>
+        _context.JobDrives.AnyAsync(job => job.CompanyId == companyId);
+
     public async Task<List<CompanyProfile>> GetAllAsync()
     {
         return await _context.CompanyProfiles

@@ -5,6 +5,9 @@ namespace AIPlacement.Application.Company.Interfaces;
 public interface ICompanyRepository
 {
     Task<CompanyProfile?> GetByIdAsync(int companyId);
+    Task<CompanyProfile?> GetByUserIdAsync(int userId);
+    Task<bool> UserExistsAsync(int userId);
+    Task<bool> HasJobDrivesAsync(int companyId);
 
     Task<List<CompanyProfile>> GetAllAsync();
 

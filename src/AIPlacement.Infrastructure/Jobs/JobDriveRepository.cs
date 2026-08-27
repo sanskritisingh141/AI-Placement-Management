@@ -54,7 +54,7 @@ public class JobDriveRepository : IJobDriveRepository
 
     public async Task<IReadOnlyList<JobEligibleBranch>> GetEligibleBranchesAsync(int jobDriveId)
     {
-        return await _dbContext.GetJobEligibleBranches()
+        return await _dbContext.JobEligibleBranches
             .Where(b => b.JobDriveId == jobDriveId)
             .ToListAsync();
     }
@@ -98,7 +98,7 @@ public class JobDriveRepository : IJobDriveRepository
         IEnumerable<int> jobDriveIds)
     {
         var ids = jobDriveIds.ToList();
-        return await _dbContext.GetJobEligibleBranches()
+        return await _dbContext.JobEligibleBranches
             .Where(b => ids.Contains(b.JobDriveId))
             .ToListAsync();
     }
@@ -128,7 +128,7 @@ public class JobDriveRepository : IJobDriveRepository
 
         await _dbContext.EligibilityCriterias.AddAsync(eligibilityCriteria);
         await _dbContext.JobSkills.AddRangeAsync(jobSkills);
-        await _dbContext.GetJobEligibleBranches().AddRangeAsync(eligibleBranches);
+        await _dbContext.JobEligibleBranches.AddRangeAsync(eligibleBranches);
         await _dbContext.SaveChangesAsync();
 
         await transaction.CommitAsync();
@@ -167,12 +167,12 @@ public class JobDriveRepository : IJobDriveRepository
             .Where(s => s.JobDriveId == jobDrive.JobDriveId)
             .ToListAsync();
 
-        var existingBranches = await _dbContext.GetJobEligibleBranches()
+        var existingBranches = await _dbContext.JobEligibleBranches
             .Where(b => b.JobDriveId == jobDrive.JobDriveId)
             .ToListAsync();
 
         _dbContext.JobSkills.RemoveRange(existingSkills);
-        _dbContext.GetJobEligibleBranches().RemoveRange(existingBranches);
+        _dbContext.JobEligibleBranches.RemoveRange(existingBranches);
 
         foreach (var skill in jobSkills)
         {
@@ -185,7 +185,7 @@ public class JobDriveRepository : IJobDriveRepository
         }
 
         await _dbContext.JobSkills.AddRangeAsync(jobSkills);
-        await _dbContext.GetJobEligibleBranches().AddRangeAsync(eligibleBranches);
+        await _dbContext.JobEligibleBranches.AddRangeAsync(eligibleBranches);
         await _dbContext.SaveChangesAsync();
     }
 }

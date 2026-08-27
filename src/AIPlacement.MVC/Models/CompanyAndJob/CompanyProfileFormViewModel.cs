@@ -1,15 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AIPlacement.Application.Company.DTOs;
+namespace AIPlacement.MVC.Models.CompanyAndJob;
 
-public class CompanyProfileDto
+public class CompanyProfileFormViewModel
 {
     public int CompanyId { get; set; }
-
-    [Range(1, int.MaxValue)]
     public int UserId { get; set; }
 
     [Required, StringLength(150)]
+    [Display(Name = "Company Name")]
     public string CompanyName { get; set; } = string.Empty;
 
     public string? Description { get; set; }
@@ -21,8 +20,10 @@ public class CompanyProfileDto
     public string? Industry { get; set; }
 
     [StringLength(150), EmailAddress]
+    [Display(Name = "Contact Email")]
     public string? ContactEmail { get; set; }
 
     [StringLength(20), Phone]
+    [Display(Name = "Contact Phone")]
     public string? ContactPhone { get; set; }
 }

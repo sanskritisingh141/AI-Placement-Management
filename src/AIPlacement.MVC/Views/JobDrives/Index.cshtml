@@ -1,0 +1,212 @@
+@model AIPlacement.MVC.Models.CompanyAndJob.JobDriveListViewModel
+
+@{
+    ViewData["Title"] = "Job Drives";
+}
+
+@if (TempData["SuccessMessage"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+@if (TempData["ErrorMessage"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="display-6 fw-semibold mb-1">Job Drives</h1>
+        <p class="text-muted mb-0">@Model.CompanyName</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="CompanyDashboard"
+           asp-action="Index"
+           asp-route-companyId="@Model.CompanyId"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+
+        <a asp-controller="JobDrives"
+           asp-action="Create"
+           asp-route-companyId="@Model.CompanyId"
+           class="btn btn-primary">
+            Create Job Drive
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Index"
+               asp-route-companyId="@Model.CompanyId"
+               class="btn @(string.IsNullOrWhiteSpace(Model.SelectedStatus) &&
+                            string.IsNullOrWhiteSpace(Model.SelectedApprovalStatus)
+                            ? "btn-primary"
+                            : "btn-outline-primary")">
+                All
+            </a>
+
+            <a asp-action="Index"
+               asp-route-companyId="@Model.CompanyId"
+               asp-route-status="Draft"
+               class="btn @(Model.SelectedStatus == "Draft"
+                            ? "btn-secondary"
+                            : "btn-outline-secondary")">
+                Draft
+            </a>
+
+            <a asp-action="Index"
+               asp-route-companyId="@Model.CompanyId"
+               asp-route-approvalStatus="Pending"
+               class="btn @(Model.SelectedApprovalStatus == "Pending"
+                            ? "btn-warning"
+                            : "btn-outline-warning")">
+                Pending Approval
+            </a>
+
+            <a asp-action="Index"
+               asp-route-companyId="@Model.CompanyId"
+               asp-route-status="Open"
+               class="btn @(Model.SelectedStatus == "Open"
+                            ? "btn-success"
+                            : "btn-outline-success")">
+                Open
+            </a>
+
+            <a asp-action="Index"
+               asp-route-companyId="@Model.CompanyId"
+               asp-route-status="Closed"
+               class="btn @(Model.SelectedStatus == "Closed"
+                            ? "btn-dark"
+                            : "btn-outline-dark")">
+                Closed
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (Model.JobDrives.Count == 0)
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <h4>No JobDrives found</h4>
+
+            @if (string.IsNullOrWhiteSpace(Model.SelectedStatus) &&
+                 string.IsNullOrWhiteSpace(Model.SelectedApprovalStatus))
+            {
+                <p class="text-muted">
+                    Create your first JobDrive to get started.
+                </p>
+
+                <a asp-action="Create"
+                   asp-route-companyId="@Model.CompanyId"
+                   class="btn btn-primary">
+                    Create Job Drive
+                </a>
+            }
+            else
+            {
+                <p class="text-muted">
+                    No JobDrives match the selected filter.
+                </p>
+
+                <a asp-action="Index"
+                   asp-route-companyId="@Model.CompanyId"
+                   class="btn btn-outline-primary">
+                    Clear Filter
+                </a>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Location</th>
+                        <th>Deadline</th>
+                        <th>Package</th>
+                        <th>Status</th>
+                        <th>Approval</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var job in Model.JobDrives)
+                    {
+                        var statusBadge = job.Status switch
+                        {
+                            "Open" => "bg-success",
+                            "Closed" => "bg-dark",
+                            _ => "bg-secondary"
+                        };
+
+                        var approvalBadge = job.ApprovalStatus switch
+                        {
+                            "Approved" => "bg-success",
+                            "Rejected" => "bg-danger",
+                            _ => "bg-warning text-dark"
+                        };
+
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@job.JobTitle</div>
+                                <div class="small text-muted">
+                                    Job ID: @job.JobDriveId
+                                </div>
+                            </td>
+
+                            <td>@job.Location</td>
+
+                            <td>
+                                @job.ApplicationDeadline.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                ₹@job.SalaryPackage.ToString("N0")
+                            </td>
+
+                            <td>
+                                <span class="badge @statusBadge">
+                                    @job.Status
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge @approvalBadge">
+                                    @job.ApprovalStatus
+                                </span>
+                            </td>
+
+                            <td class="text-end">
+                                <a asp-action="Details"
+                                   asp-route-jobDriveId="@job.JobDriveId"
+                                   asp-route-companyId="@Model.CompanyId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Details
+                                </a>
+
+                                @if (job.Status == "Draft")
+                                {
+                                    <a asp-action="Edit"
+                                       asp-route-jobDriveId="@job.JobDriveId"
+                                       asp-route-companyId="@Model.CompanyId"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        Edit
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

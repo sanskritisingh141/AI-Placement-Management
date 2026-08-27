@@ -41,10 +41,16 @@ public class CompaniesController : ControllerBase
     public async Task<IActionResult> Create(
         [FromBody] CompanyProfileDto company)
     {
-        var createdCompany =
-            await _companyService.CreateAsync(company);
-
-        return Ok(createdCompany);
+        try
+        {
+            var createdCompany = await _companyService.CreateAsync(company);
+            return CreatedAtAction(nameof(GetById),
+                new { companyId = createdCompany.CompanyId }, createdCompany);
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
     }
 
     [HttpPut("{companyId:int}")]
@@ -52,23 +58,28 @@ public class CompaniesController : ControllerBase
         int companyId,
         [FromBody] CompanyProfileDto company)
     {
-        var updatedCompany =
-            await _companyService.UpdateAsync(companyId, company);
-
-        if (updatedCompany == null)
-            return NotFound();
-
-        return Ok(updatedCompany);
+        try
+        {
+            var updatedCompany = await _companyService.UpdateAsync(companyId, company);
+            return updatedCompany is null ? NotFound() : Ok(updatedCompany);
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
     }
 
     [HttpDelete("{companyId:int}")]
     public async Task<IActionResult> Delete(int companyId)
     {
-        var deleted = await _companyService.DeleteAsync(companyId);
-
-        if (!deleted)
-            return NotFound();
-
-        return NoContent();
+        try
+        {
+            var deleted = await _companyService.DeleteAsync(companyId);
+            return deleted ? NoContent() : NotFound();
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
     }
 }

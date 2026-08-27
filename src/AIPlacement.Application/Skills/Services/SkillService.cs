@@ -14,6 +14,11 @@ public class SkillService : ISkillService
         _skillRepository = skillRepository;
     }
 
+    public async Task<IReadOnlyList<SkillDto>> GetAllAsync()
+    {
+    return await _skillRepository.GetAllAsync();
+    }
+
     public async Task<SkillDto?> GetByIdAsync(int skillId)
     {
         return await _skillRepository.GetByIdAsync(skillId);
