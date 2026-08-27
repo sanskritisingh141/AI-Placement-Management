@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
 using AIPlacement.Application.Company.Interfaces;
@@ -12,6 +13,28 @@ using AIPlacement.Infrastructure.Repositories;
 using AIPlacement.Infrastructure.Skills;
 using AllPlacement.MVC.Data;
 using Microsoft.EntityFrameworkCore;
+=======
+using AIPlacement.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using AIPlacement.Application.Admin.Interfaces;
+using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Certifications.Interfaces;
+using AIPlacement.Application.Certifications.Services;
+using AIPlacement.Application.Projects.Interfaces;
+using AIPlacement.Application.Projects.Services;
+using AIPlacement.Application.Resumes.Interfaces;
+using AIPlacement.Application.Resumes.Services;
+using AIPlacement.Application.Skills.Interfaces;
+using AIPlacement.Application.Skills.Services;
+using AIPlacement.Application.Students.Interfaces;
+using AIPlacement.Application.Students.Services;
+
+using AIPlacement.Infrastructure.Certifications;
+using AIPlacement.Infrastructure.Projects;
+using AIPlacement.Infrastructure.Resumes;
+using AIPlacement.Infrastructure.Skills;
+using AIPlacement.Infrastructure.Students;
+>>>>>>> 736ca76 (Add student profile and skills frontend)
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +67,23 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Admin + Analytics (Pair 3)
+// Student module
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
+builder.Services.AddScoped<ICertificationService, CertificationService>();
+builder.Services.AddScoped<ICertificationRepository, CertificationRepository>();
+
+builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<IResumeRepository, ResumeRepository>();
+
+// Admin + Analytics
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
 builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
