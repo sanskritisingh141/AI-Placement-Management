@@ -10,6 +10,7 @@ namespace AIPlacement.Application.Jobs.Interfaces
     public interface IJobEligibleBranchRepository
     {
         Task<IEnumerable<JobEligibleBranch>> GetByJobDriveIdAsync(int jobDriveId);
+        Task<JobEligibleBranch?> GetByIdAsync(int jobBranchId);
         Task AddAsync(JobEligibleBranch branch);
         Task DeleteAsync(int jobBranchId);
     }

@@ -187,6 +187,9 @@ public class JobDriveService : IJobDriveService
         if (jobDrive is null)
             return null;
 
+        if (jobDrive.Status != JobDriveStatus.Open)
+            throw new InvalidOperationException("Only an open job drive can be closed.");
+
         jobDrive.Status = JobDriveStatus.Closed;
         await _jobDriveRepository.UpdateJobDriveAsync(jobDrive);
 
@@ -257,6 +260,7 @@ public class JobDriveService : IJobDriveService
             throw new ArgumentException("A valid company ID is required.");
 
         ValidateRequiredSkillIds(request.RequiredSkillIds);
+        ValidateEligibleBranches(request.EligibleBranches);
 
         ValidateCommonFields(
             request.JobTitle,
@@ -272,6 +276,7 @@ public class JobDriveService : IJobDriveService
     private static void ValidateRequest(UpdateJobDriveDto request)
     {
         ValidateRequiredSkillIds(request.RequiredSkillIds);
+        ValidateEligibleBranches(request.EligibleBranches);
 
         ValidateCommonFields(
             request.JobTitle,
@@ -332,6 +337,21 @@ public class JobDriveService : IJobDriveService
 
         if (requiredSkillIds.Any(skillId => skillId <= 0))
             throw new ArgumentException("Required skill IDs must be positive.");
+    }
+
+    private static void ValidateEligibleBranches(IReadOnlyList<string>? eligibleBranches)
+    {
+        if (eligibleBranches is null ||
+            !eligibleBranches.Any(branch => !string.IsNullOrWhiteSpace(branch)))
+        {
+            throw new ArgumentException("At least one eligible branch is required.");
+        }
+
+        if (eligibleBranches.Any(branch =>
+                !string.IsNullOrWhiteSpace(branch) && branch.Trim().Length > 100))
+        {
+            throw new ArgumentException("Eligible branch names cannot exceed 100 characters.");
+        }
     }
 
     private async Task ValidateReferencesAsync(

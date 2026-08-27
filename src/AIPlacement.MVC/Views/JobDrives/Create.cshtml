@@ -1,11 +1,12 @@
 @model AIPlacement.MVC.Models.CompanyAndJob.JobDriveFormViewModel
 
 @{
-    ViewData["Title"] = "Create Job Drive";
+    var isEdit = Model.JobDriveId.HasValue;
+    ViewData["Title"] = isEdit ? "Edit Job Drive" : "Create Job Drive";
 }
 
 <div class="mb-4">
-    <h1 class="display-6 fw-semibold mb-1">Create Job Drive</h1>
+    <h1 class="display-6 fw-semibold mb-1">@(isEdit ? "Edit Job Drive" : "Create Job Drive")</h1>
     <p class="text-muted mb-0">
         Enter the job details, required skills and eligibility criteria.
     </p>
@@ -13,10 +14,11 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form action="/JobDrives/Create" method="post">
+        <form action="@(isEdit ? "/JobDrives/Edit" : "/JobDrives/Create")" method="post">
             @Html.AntiForgeryToken()
 
             <input asp-for="CompanyId" type="hidden" />
+            <input asp-for="JobDriveId" type="hidden" />
 
             <div asp-validation-summary="ModelOnly"
                  class="alert alert-danger"
@@ -194,7 +196,7 @@
 
             <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn btn-primary">
-                    Create Job Drive
+                    @(isEdit ? "Save Changes" : "Create Job Drive")
                 </button>
 
                 <a asp-action="Index"

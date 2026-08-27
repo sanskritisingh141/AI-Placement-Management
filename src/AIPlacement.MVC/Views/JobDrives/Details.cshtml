@@ -1,0 +1,106 @@
+@using AIPlacement.Application.Jobs
+@model AIPlacement.MVC.Models.CompanyAndJob.JobDriveDetailsViewModel
+@{
+    ViewData["Title"] = "JobDrive Details";
+    var job = Model.JobDrive;
+}
+
+@if (TempData["SuccessMessage"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+@if (TempData["ErrorMessage"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="display-6 fw-semibold mb-1">@job.JobTitle</h1>
+        <p class="text-muted mb-0">@Model.CompanyName · @job.Location</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-start">
+        <a asp-action="Index" asp-route-companyId="@Model.CompanyId"
+           class="btn btn-outline-secondary">Back to Jobs</a>
+        @if (job.Status != JobDriveStatus.Closed)
+        {
+            <a asp-action="Edit" asp-route-jobDriveId="@job.JobDriveId"
+               asp-route-companyId="@Model.CompanyId" class="btn btn-outline-primary">Edit</a>
+        }
+        @if (job.Status == JobDriveStatus.Draft &&
+             job.ApprovalStatus == JobDriveApprovalStatus.Approved)
+        {
+            <form action="/JobDrives/Publish" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="jobDriveId" value="@job.JobDriveId" />
+                <input type="hidden" name="companyId" value="@Model.CompanyId" />
+                <button class="btn btn-success" type="submit">Publish</button>
+            </form>
+        }
+        @if (job.Status == JobDriveStatus.Open)
+        {
+            <form action="/JobDrives/Close" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="jobDriveId" value="@job.JobDriveId" />
+                <input type="hidden" name="companyId" value="@Model.CompanyId" />
+                <button class="btn btn-danger" type="submit">Close JobDrive</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex gap-2 mb-3">
+                    <span class="badge bg-secondary">@job.Status</span>
+                    <span class="badge @(job.ApprovalStatus == "Approved" ? "bg-success" : job.ApprovalStatus == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
+                        @job.ApprovalStatus
+                    </span>
+                </div>
+                <h4>Description</h4>
+                <p class="text-break" style="white-space: pre-line">@job.JobDescription</p>
+                <hr />
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Salary Package</dt>
+                    <dd class="col-sm-7">₹@job.SalaryPackage.ToString("N0")</dd>
+                    <dt class="col-sm-5">Application Deadline</dt>
+                    <dd class="col-sm-7">@job.ApplicationDeadline.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</dd>
+                    <dt class="col-sm-5">Created</dt>
+                    <dd class="col-sm-7">@job.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4>Eligibility</h4>
+                <dl class="row mb-0">
+                    <dt class="col-7">Minimum CGPA</dt><dd class="col-5">@job.MinCGPA</dd>
+                    <dt class="col-7">Maximum Backlogs</dt><dd class="col-5">@job.MaxBacklogs</dd>
+                    <dt class="col-7">Graduation Year</dt><dd class="col-5">@job.GraduationYear</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4>Required Skills</h4>
+                @foreach (var skill in Model.RequiredSkills)
+                {
+                    <span class="badge bg-primary me-1 mb-1">@skill.SkillName</span>
+                }
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4>Eligible Branches</h4>
+                @foreach (var branch in job.EligibleBranches)
+                {
+                    <span class="badge bg-info text-dark me-1 mb-1">@branch</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>

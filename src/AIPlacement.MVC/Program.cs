@@ -8,6 +8,7 @@ using AIPlacement.Application.Skills.Interfaces;
 using AIPlacement.Application.Skills.Services;
 using AIPlacement.Infrastructure.Company;
 using AIPlacement.Infrastructure.Jobs;
+using AIPlacement.Infrastructure.Repositories;
 using AIPlacement.Infrastructure.Skills;
 using AllPlacement.MVC.Data;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,8 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 // EligibilityCriteria and JobEligibleBranches (Pair 2 Member 3)
 builder.Services.AddScoped<IEligibilityCriteriaService, EligibilityCriteriaService>();
 builder.Services.AddScoped<IJobEligibleBranchService, JobEligibleBranchService>();
+builder.Services.AddScoped<IEligibilityCriteriaRepository, EligibilityCriteriaRepository>();
+builder.Services.AddScoped<IJobEligibleBranchRepository, JobEligibleBranchRepository>();
 
 var app = builder.Build();
 

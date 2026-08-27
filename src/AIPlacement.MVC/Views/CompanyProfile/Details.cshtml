@@ -1,0 +1,23 @@
+@model AIPlacement.Application.Company.DTOs.CompanyProfileDto
+@{ ViewData["Title"] = "Company Profile"; }
+
+@if (TempData["SuccessMessage"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div><h1 class="display-6 fw-semibold">@Model.CompanyName</h1><p class="text-muted">Company Profile</p></div>
+    <div class="d-flex gap-2">
+        <a asp-controller="CompanyDashboard" asp-action="Index" asp-route-companyId="@Model.CompanyId" class="btn btn-outline-secondary">Dashboard</a>
+        <a asp-action="Edit" asp-route-companyId="@Model.CompanyId" class="btn btn-primary">Edit Profile</a>
+    </div>
+</div>
+
+<div class="card shadow-sm"><div class="card-body"><dl class="row mb-0">
+    <dt class="col-sm-3">Industry</dt><dd class="col-sm-9">@(Model.Industry ?? "Not provided")</dd>
+    <dt class="col-sm-3">Website</dt><dd class="col-sm-9">@(Model.Website ?? "Not provided")</dd>
+    <dt class="col-sm-3">Contact Email</dt><dd class="col-sm-9">@(Model.ContactEmail ?? "Not provided")</dd>
+    <dt class="col-sm-3">Contact Phone</dt><dd class="col-sm-9">@(Model.ContactPhone ?? "Not provided")</dd>
+    <dt class="col-sm-3">Description</dt><dd class="col-sm-9" style="white-space: pre-line">@(Model.Description ?? "Not provided")</dd>
+</dl></div></div>

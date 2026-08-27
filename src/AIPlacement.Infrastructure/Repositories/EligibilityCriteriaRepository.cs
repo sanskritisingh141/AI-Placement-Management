@@ -21,28 +21,34 @@ namespace AIPlacement.Infrastructure.Repositories
 
         public async Task<EligibilityCriteria?> GetByJobDriveIdAsync(int jobDriveId)
         {
-            return await _context.EligibilityCriteria
+            return await _context.EligibilityCriterias
                 .FirstOrDefaultAsync(e => e.JobDriveId == jobDriveId);
+        }
+
+        public async Task<EligibilityCriteria?> GetByIdAsync(int eligibilityId)
+        {
+            return await _context.EligibilityCriterias
+                .FirstOrDefaultAsync(e => e.EligibilityId == eligibilityId);
         }
 
         public async Task AddAsync(EligibilityCriteria eligibilityCriteria)
         {
-            _context.EligibilityCriteria.Add(eligibilityCriteria);
+            _context.EligibilityCriterias.Add(eligibilityCriteria);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(EligibilityCriteria eligibilityCriteria)
         {
-            _context.EligibilityCriteria.Update(eligibilityCriteria);
+            _context.EligibilityCriterias.Update(eligibilityCriteria);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int eligibilityId)
         {
-            var entity = await _context.EligibilityCriteria.FindAsync(eligibilityId);
+            var entity = await _context.EligibilityCriterias.FindAsync(eligibilityId);
             if (entity != null)
             {
-                _context.EligibilityCriteria.Remove(entity);
+                _context.EligibilityCriterias.Remove(entity);
                 await _context.SaveChangesAsync();
             }
         }

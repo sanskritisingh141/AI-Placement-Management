@@ -20,6 +20,7 @@ using AIPlacement.Infrastructure.Jobs;
 using AIPlacement.Application.Recruitment.Interfaces;
 using AIPlacement.Application.Recruitment.Services;
 using AIPlacement.Infrastructure.Recruitment;
+using AIPlacement.Infrastructure.Repositories;
 using AIPlacement.Infrastructure.Certifications;
 using AIPlacement.Infrastructure.Company;
 using AIPlacement.Infrastructure.Data;
@@ -158,6 +159,10 @@ builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 builder.Services.AddScoped<IJobDriveRepository, JobDriveRepository>();
 builder.Services.AddScoped<IJobDriveService, JobDriveService>();
+builder.Services.AddScoped<IEligibilityCriteriaRepository, EligibilityCriteriaRepository>();
+builder.Services.AddScoped<IEligibilityCriteriaService, EligibilityCriteriaService>();
+builder.Services.AddScoped<IJobEligibleBranchRepository, JobEligibleBranchRepository>();
+builder.Services.AddScoped<IJobEligibleBranchService, JobEligibleBranchService>();
 
 // ===============================
 // Skills
