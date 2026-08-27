@@ -1,6 +1,14 @@
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Company.Interfaces;
+using AIPlacement.Application.Company.Services;
+using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.Application.Jobs.Services;
+using AIPlacement.Application.Skills.Interfaces;
+using AIPlacement.Application.Skills.Services;
+using AIPlacement.Infrastructure.Company;
+using AIPlacement.Infrastructure.Jobs;
+using AIPlacement.Infrastructure.Skills;
 using AllPlacement.MVC.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +18,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+builder.Services.AddDbContext<
+    AIPlacement.Infrastructure.Data.ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Pair 2: Company and Job modules
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IJobDriveRepository, JobDriveRepository>();
+builder.Services.AddScoped<IJobDriveService, JobDriveService>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+
 builder.Services.AddControllersWithViews();
 
 // Admin login state is tracked with a lightweight session cookie until the shared
@@ -29,17 +49,16 @@ builder.Services.AddScoped<IUserRecordsService, UserRecordsService>();
 builder.Services.AddScoped<IJobDriveApprovalService, JobDriveApprovalService>();
 builder.Services.AddScoped<IApplicationMonitoringService, ApplicationMonitoringService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+// EligibilityCriteria and JobEligibleBranches (Pair 2 Member 3)
 builder.Services.AddScoped<IEligibilityCriteriaService, EligibilityCriteriaService>();
 builder.Services.AddScoped<IJobEligibleBranchService, JobEligibleBranchService>();
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
