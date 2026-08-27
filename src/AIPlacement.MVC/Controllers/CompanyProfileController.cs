@@ -1,10 +1,14 @@
 using AIPlacement.Application.Company.DTOs;
 using AIPlacement.Application.Company.Interfaces;
 using AIPlacement.MVC.Models.CompanyAndJob;
+using AIPlacement.Application.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AIPlacement.MVC.Controllers;
 
+[Authorize(Roles = RoleNames.Company)]
 public class CompanyProfileController : Controller
 {
     private readonly ICompanyService _companyService;
@@ -13,17 +17,17 @@ public class CompanyProfileController : Controller
         _companyService = companyService;
 
     [HttpGet]
-    public async Task<IActionResult> Details(int companyId)
+    public async Task<IActionResult> Details()
     {
-        if (companyId <= 0) return BadRequest("A valid company ID is required.");
+        if (!TryGetCompanyId(out var companyId)) return Forbid();
         var company = await _companyService.GetByIdAsync(companyId);
         return company is null ? NotFound("Company profile not found.") : View(company);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Edit(int companyId)
+    public async Task<IActionResult> Edit()
     {
-        if (companyId <= 0) return BadRequest("A valid company ID is required.");
+        if (!TryGetCompanyId(out var companyId)) return Forbid();
         var company = await _companyService.GetByIdAsync(companyId);
         if (company is null) return NotFound("Company profile not found.");
         return View(ToForm(company));
@@ -33,18 +37,16 @@ public class CompanyProfileController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(CompanyProfileFormViewModel model)
     {
-        var existing = model.CompanyId > 0
-            ? await _companyService.GetByIdAsync(model.CompanyId)
-            : null;
+        if (!TryGetCompanyId(out var companyId) || companyId != model.CompanyId)
+            return Forbid();
+        var existing = await _companyService.GetByIdAsync(companyId);
         if (existing is null) return NotFound("Company profile not found.");
-        if (existing.UserId != model.UserId)
-            return BadRequest("The company profile does not match its user.");
         if (!ModelState.IsValid) return View(model);
 
         var updated = await _companyService.UpdateAsync(model.CompanyId, new CompanyProfileDto
         {
             CompanyId = model.CompanyId,
-            UserId = model.UserId,
+            UserId = existing.UserId,
             CompanyName = model.CompanyName,
             Description = model.Description,
             Website = model.Website,
@@ -68,4 +70,7 @@ public class CompanyProfileController : Controller
         ContactEmail = company.ContactEmail,
         ContactPhone = company.ContactPhone
     };
+
+    private bool TryGetCompanyId(out int companyId) =>
+        int.TryParse(User.FindFirstValue("profile_id"), out companyId);
 }

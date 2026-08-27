@@ -10,6 +10,8 @@ public interface IResumeService
 
     Task<ResumeDto> CreateAsync(ResumeDto resume);
 
+    Task<ResumeDto> AddVersionAsync(int studentId, string fileName, string filePath);
+
     Task<ResumeDto?> UpdateAsync(int resumeId, ResumeDto resume);
 
     Task<bool> DeleteAsync(int resumeId);

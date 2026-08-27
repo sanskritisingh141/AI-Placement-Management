@@ -20,5 +20,5 @@ public interface ISkillRepository
         Skill skill,
         StudentSkill studentSkill);
 
-    Task<bool> DeleteAsync(int skillId);
+    Task<bool> DeleteStudentSkillAsync(int studentId, int skillId);
 }

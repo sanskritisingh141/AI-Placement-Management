@@ -4,10 +4,14 @@ using AIPlacement.Application.Jobs.DTOs;
 using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.Application.Skills.Interfaces;
 using AIPlacement.MVC.Models.CompanyAndJob;
+using AIPlacement.Application.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AIPlacement.MVC.Controllers;
 
+[Authorize(Roles = RoleNames.Company)]
 public class JobDrivesController : Controller
 {
     private readonly ICompanyService _companyService;
@@ -24,7 +28,7 @@ public class JobDrivesController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Index(int? companyId, string? status,
-        string? approvalStatus)
+        string? approvalStatus, string? search)
     {
         var company = await GetCompanyAsync(companyId);
         if (company.Result is not null) return company.Result;
@@ -37,6 +41,9 @@ public class JobDrivesController : Controller
                 job.Status.Equals(status, StringComparison.OrdinalIgnoreCase))
             .Where(job => string.IsNullOrWhiteSpace(approvalStatus) ||
                 job.ApprovalStatus.Equals(approvalStatus, StringComparison.OrdinalIgnoreCase))
+            .Where(job => string.IsNullOrWhiteSpace(search) ||
+                job.JobTitle.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                job.Location.Contains(search, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         return View(new JobDriveListViewModel
@@ -228,9 +235,9 @@ public class JobDrivesController : Controller
     private async Task<(AIPlacement.Application.Company.DTOs.CompanyProfileDto? Value,
         IActionResult? Result)> GetCompanyAsync(int? companyId)
     {
-        if (companyId is null || companyId <= 0)
-            return (null, BadRequest("A valid company ID is required."));
-        var company = await _companyService.GetByIdAsync(companyId.Value);
+        if (!int.TryParse(User.FindFirstValue("profile_id"), out var ownedCompanyId))
+            return (null, Forbid());
+        var company = await _companyService.GetByIdAsync(ownedCompanyId);
         return company is null
             ? (null, NotFound("Company profile not found."))
             : (company, null);
@@ -239,7 +246,9 @@ public class JobDrivesController : Controller
     private async Task<(AIPlacement.Application.Company.DTOs.CompanyProfileDto? Company,
         JobDriveDto? Job, IActionResult? Error)> GetOwnedJobAsync(int jobDriveId, int companyId)
     {
-        if (jobDriveId <= 0 || companyId <= 0)
+        if (!int.TryParse(User.FindFirstValue("profile_id"), out companyId))
+            return (null, null, Forbid());
+        if (jobDriveId <= 0)
             return (null, null, BadRequest("Valid JobDrive and Company IDs are required."));
         var company = await _companyService.GetByIdAsync(companyId);
         if (company is null) return (null, null, NotFound("Company profile not found."));

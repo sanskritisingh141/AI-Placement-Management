@@ -7,10 +7,15 @@ using AIPlacement.Application.Skills.DTOs;
 using AIPlacement.Application.Skills.Interfaces;
 using AIPlacement.Application.Students.DTOs;
 using AIPlacement.Application.Students.Interfaces;
+using AIPlacement.Application.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 
 namespace AIPlacement.MVC.Controllers;
 
+[Authorize(Roles = RoleNames.Student)]
 public class StudentController : Controller
 {
     private readonly IStudentService _studentService;
@@ -31,6 +36,36 @@ public class StudentController : Controller
         _projectService = projectService;
         _certificationService = certificationService;
         _resumeService = resumeService;
+    }
+
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!int.TryParse(User.FindFirstValue("profile_id"), out var studentId))
+        {
+            context.Result = Forbid();
+            return;
+        }
+
+        foreach (var argumentName in context.ActionArguments.Keys.ToList())
+        {
+            if (string.Equals(argumentName, "studentId", StringComparison.OrdinalIgnoreCase))
+                context.ActionArguments[argumentName] = studentId;
+
+            switch (context.ActionArguments[argumentName])
+            {
+                case SkillDto skill:
+                    skill.StudentId = studentId;
+                    break;
+                case ProjectDto project:
+                    project.StudentId = studentId;
+                    break;
+                case CertificationDto certification:
+                    certification.StudentId = studentId;
+                    break;
+            }
+        }
+
+        base.OnActionExecuting(context);
     }
 
 
@@ -164,7 +199,7 @@ public class StudentController : Controller
         int skillId,
         int studentId)
     {
-        await _skillService.DeleteAsync(skillId);
+        await _skillService.DeleteAsync(studentId, skillId);
 
         return RedirectToAction(
             nameof(Skills),
@@ -208,6 +243,10 @@ public class StudentController : Controller
         int projectId,
         ProjectDto project)
     {
+        var ownedProjects = await _projectService.GetByStudentIdAsync(project.StudentId);
+        if (!ownedProjects.Any(item => item.ProjectId == projectId))
+            return Forbid();
+
         if (!ModelState.IsValid)
             return RedirectToAction(
                 nameof(Projects),
@@ -232,6 +271,10 @@ public class StudentController : Controller
         int projectId,
         int studentId)
     {
+        var ownedProjects = await _projectService.GetByStudentIdAsync(studentId);
+        if (!ownedProjects.Any(item => item.ProjectId == projectId))
+            return Forbid();
+
         await _projectService.DeleteAsync(projectId);
 
         return RedirectToAction(
@@ -277,6 +320,11 @@ public class StudentController : Controller
         int certificationId,
         CertificationDto certification)
     {
+        var ownedCertifications = await _certificationService
+            .GetByStudentIdAsync(certification.StudentId);
+        if (!ownedCertifications.Any(item => item.CertificationId == certificationId))
+            return Forbid();
+
         if (!ModelState.IsValid)
             return RedirectToAction(
                 nameof(Certifications),
@@ -302,6 +350,10 @@ public class StudentController : Controller
         int certificationId,
         int studentId)
     {
+        var ownedCertifications = await _certificationService.GetByStudentIdAsync(studentId);
+        if (!ownedCertifications.Any(item => item.CertificationId == certificationId))
+            return Forbid();
+
         await _certificationService.DeleteAsync(
             certificationId);
 

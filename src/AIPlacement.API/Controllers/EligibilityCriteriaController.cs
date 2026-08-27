@@ -3,6 +3,9 @@ using AIPlacement.Application.Jobs.Services;
 using AIPlacement.Domain.Entities.Jobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AIPlacement.Application.Jobs.Interfaces;
+using AIPlacement.Application.Recruitment.Interfaces;
+using System.Security.Claims;
 
 namespace AIPlacement.API.Controllers;
 
@@ -12,12 +15,16 @@ namespace AIPlacement.API.Controllers;
 public class EligibilityCriteriaController : ControllerBase
 {
     private readonly IEligibilityCriteriaService _service;
+    private readonly IEligibilityCriteriaRepository _repository;
+    private readonly IRecruitmentRepository _recruitment;
 
-    public EligibilityCriteriaController(IEligibilityCriteriaService service) => _service = service;
+    public EligibilityCriteriaController(IEligibilityCriteriaService service, IEligibilityCriteriaRepository repository, IRecruitmentRepository recruitment)
+        => (_service, _repository, _recruitment) = (service, repository, recruitment);
 
     [HttpGet("job-drive/{jobDriveId:int}")]
     public async Task<IActionResult> GetByJobDriveId(int jobDriveId)
     {
+        if (!await OwnsJob(jobDriveId)) return Forbid();
         var criteria = await _service.GetByJobDriveIdAsync(jobDriveId);
         return criteria is null ? NotFound() : Ok(ToDto(criteria));
     }
@@ -25,6 +32,7 @@ public class EligibilityCriteriaController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(EligibilityCriteriaDto dto)
     {
+        if (!await OwnsJob(dto.JobDriveId)) return Forbid();
         try
         {
             var entity = ToEntity(dto);
@@ -41,6 +49,9 @@ public class EligibilityCriteriaController : ControllerBase
     [HttpPut("{eligibilityId:int}")]
     public async Task<IActionResult> Update(int eligibilityId, EligibilityCriteriaDto dto)
     {
+        var existing = await _repository.GetByIdAsync(eligibilityId);
+        if (existing is null) return NotFound();
+        if (!await OwnsJob(existing.JobDriveId) || dto.JobDriveId != existing.JobDriveId) return Forbid();
         if (dto.EligibilityId != 0 && dto.EligibilityId != eligibilityId)
             return BadRequest(new { message = "Eligibility ID does not match the route." });
 
@@ -60,6 +71,9 @@ public class EligibilityCriteriaController : ControllerBase
     [HttpDelete("{eligibilityId:int}")]
     public async Task<IActionResult> Delete(int eligibilityId)
     {
+        var existing = await _repository.GetByIdAsync(eligibilityId);
+        if (existing is null) return NotFound();
+        if (!await OwnsJob(existing.JobDriveId)) return Forbid();
         try
         {
             await _service.DeleteAsync(eligibilityId);
@@ -92,4 +106,6 @@ public class EligibilityCriteriaController : ControllerBase
         MaxBacklogs = dto.MaxBacklogs,
         GraduationYear = dto.GraduationYear
     };
+    private async Task<bool> OwnsJob(int jobId) => User.IsInRole("Admin") ||
+        await _recruitment.GetCompanyIdForJobDriveAsync(jobId) == int.Parse(User.FindFirstValue("profile_id")!);
 }

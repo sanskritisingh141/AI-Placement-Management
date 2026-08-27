@@ -13,5 +13,5 @@ public interface ISkillService
 
     Task<SkillDto?> UpdateAsync(int skillId, SkillDto skill);
 
-    Task<bool> DeleteAsync(int skillId);
+    Task<bool> DeleteAsync(int studentId, int skillId);
 }

@@ -31,19 +31,13 @@ public class SkillRepository : ISkillRepository
 
     public async Task<SkillDto?> GetByIdAsync(int skillId)
     {
-        return await (
-            from studentSkill in _context.StudentSkills
-            join skill in _context.Skills
-                on studentSkill.SkillId equals skill.SkillId
-            where skill.SkillId == skillId
-            select new SkillDto
+        return await _context.Skills.AsNoTracking()
+            .Where(skill => skill.SkillId == skillId)
+            .Select(skill => new SkillDto
             {
                 SkillId = skill.SkillId,
-                StudentId = studentSkill.StudentId,
-                SkillName = skill.SkillName,
-                ProficiencyLevel = studentSkill.ProficiencyLevel ?? string.Empty
-            }
-        ).FirstOrDefaultAsync();
+                SkillName = skill.SkillName
+            }).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<SkillDto>> GetByStudentIdAsync(int studentId)
@@ -83,7 +77,17 @@ public class SkillRepository : ISkillRepository
             studentSkill.SkillId = skill.SkillId;
         }
 
-        _context.StudentSkills.Add(studentSkill);
+        var existingAssociation = await _context.StudentSkills.FirstOrDefaultAsync(x =>
+            x.StudentId == studentSkill.StudentId && x.SkillId == studentSkill.SkillId);
+        if (existingAssociation is not null)
+        {
+            existingAssociation.ProficiencyLevel = studentSkill.ProficiencyLevel;
+            studentSkill = existingAssociation;
+        }
+        else
+        {
+            _context.StudentSkills.Add(studentSkill);
+        }
 
         await _context.SaveChangesAsync();
 
@@ -115,9 +119,6 @@ public class SkillRepository : ISkillRepository
         if (existingStudentSkill == null)
             return null;
 
-        existingSkill.SkillName = skill.SkillName;
-        existingSkill.Category = skill.Category;
-
         existingStudentSkill.ProficiencyLevel =
             studentSkill.ProficiencyLevel;
 
@@ -133,23 +134,14 @@ public class SkillRepository : ISkillRepository
         };
     }
 
-    public async Task<bool> DeleteAsync(int skillId)
+    public async Task<bool> DeleteStudentSkillAsync(int studentId, int skillId)
     {
-        var studentSkills = await _context.StudentSkills
-            .Where(x => x.SkillId == skillId)
-            .ToListAsync();
-
-        var skill = await _context.Skills
-            .FirstOrDefaultAsync(x => x.SkillId == skillId);
-
-        if (skill == null)
+        var studentSkill = await _context.StudentSkills.FirstOrDefaultAsync(x =>
+            x.StudentId == studentId && x.SkillId == skillId);
+        if (studentSkill == null)
             return false;
-
-        _context.StudentSkills.RemoveRange(studentSkills);
-        _context.Skills.Remove(skill);
-
+        _context.StudentSkills.Remove(studentSkill);
         await _context.SaveChangesAsync();
-
         return true;
     }
 }

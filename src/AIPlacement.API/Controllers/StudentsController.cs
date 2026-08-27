@@ -1,11 +1,15 @@
 ﻿using AIPlacement.Application.Students.DTOs;
 using AIPlacement.Application.Students.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using AIPlacement.Application.Authentication;
+using System.Security.Claims;
 
 namespace AIPlacement.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class StudentsController : ControllerBase
 {
     private readonly IStudentService _studentService;
@@ -18,6 +22,7 @@ public class StudentsController : ControllerBase
     [HttpGet("{studentId:int}")]
     public async Task<IActionResult> GetById(int studentId)
     {
+        if (!CanAccess(studentId)) return Forbid();
         var student = await _studentService.GetByIdAsync(studentId);
 
         if (student == null)
@@ -29,6 +34,7 @@ public class StudentsController : ControllerBase
     [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {
+        if (!User.IsInRole(RoleNames.Admin) && userId != UserId) return Forbid();
         var student = await _studentService.GetByUserIdAsync(userId);
 
         if (student == null)
@@ -37,6 +43,7 @@ public class StudentsController : ControllerBase
         return Ok(student);
     }
 
+    [Authorize(Roles = RoleNames.Admin)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] StudentDto student)
     {
@@ -50,6 +57,9 @@ public class StudentsController : ControllerBase
         int studentId,
         [FromBody] StudentDto student)
     {
+        if (!CanAccess(studentId)) return Forbid();
+        student.StudentId = studentId;
+        student.UserId = UserId;
         var updatedStudent =
             await _studentService.UpdateAsync(studentId, student);
 
@@ -59,6 +69,7 @@ public class StudentsController : ControllerBase
         return Ok(updatedStudent);
     }
 
+    [Authorize(Roles = RoleNames.Admin)]
     [HttpDelete("{studentId:int}")]
     public async Task<IActionResult> Delete(int studentId)
     {
@@ -69,4 +80,7 @@ public class StudentsController : ControllerBase
 
         return NoContent();
     }
+    private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private bool CanAccess(int id) => User.IsInRole(RoleNames.Admin) ||
+        (User.IsInRole(RoleNames.Student) && int.Parse(User.FindFirstValue("profile_id")!) == id);
 }

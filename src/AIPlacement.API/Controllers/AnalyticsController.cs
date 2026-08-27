@@ -1,10 +1,13 @@
 using AIPlacement.Application.Admin.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using AIPlacement.Application.Authentication;
 
 namespace AIPlacement.API.Controllers;
 
 [ApiController]
 [Route("api/admin/analytics")]
+[Authorize(Roles = RoleNames.Admin)]
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsService _analyticsService;

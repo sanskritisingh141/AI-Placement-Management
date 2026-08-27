@@ -5,35 +5,22 @@ namespace AIPlacement.Application.Admin.Services;
 
 public class UserRecordsService : IUserRecordsService
 {
-    public Task<IReadOnlyList<UserRecordDto>> GetStudentsAsync()
+    private readonly IAdminRepository _repository;
+
+    public UserRecordsService(IAdminRepository repository)
     {
-        IReadOnlyList<UserRecordDto> students = AdminMockDataStore.Students.ToList();
-        return Task.FromResult(students);
+        _repository = repository;
     }
 
-    public Task<IReadOnlyList<UserRecordDto>> GetRecruitersAsync()
-    {
-        IReadOnlyList<UserRecordDto> recruiters = AdminMockDataStore.Recruiters.ToList();
-        return Task.FromResult(recruiters);
-    }
+    public Task<IReadOnlyList<UserRecordDto>> GetStudentsAsync() =>
+        _repository.GetStudentsAsync();
 
-    public Task<UserRecordDto?> GetByUserIdAsync(int userId)
-    {
-        var user = AdminMockDataStore.Students.FirstOrDefault(s => s.UserId == userId)
-                   ?? AdminMockDataStore.Recruiters.FirstOrDefault(r => r.UserId == userId);
+    public Task<IReadOnlyList<UserRecordDto>> GetRecruitersAsync() =>
+        _repository.GetCompaniesAsync();
 
-        return Task.FromResult(user);
-    }
+    public Task<UserRecordDto?> GetByUserIdAsync(int userId) =>
+        _repository.GetUserAsync(userId);
 
-    public Task<bool> SetActiveStatusAsync(int userId, bool isActive)
-    {
-        var exists = AdminMockDataStore.Students.Any(s => s.UserId == userId)
-                     || AdminMockDataStore.Recruiters.Any(r => r.UserId == userId);
-
-        if (!exists)
-            return Task.FromResult(false);
-
-        AdminMockDataStore.SetActiveStatus(userId, isActive);
-        return Task.FromResult(true);
-    }
+    public Task<bool> SetActiveStatusAsync(int userId, bool isActive) =>
+        _repository.SetUserActiveAsync(userId, isActive);
 }

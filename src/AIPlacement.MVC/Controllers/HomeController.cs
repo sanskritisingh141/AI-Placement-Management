@@ -1,6 +1,7 @@
 using AIPlacement.MVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using AIPlacement.Application.Authentication;
 
 namespace AIPlacement.MVC.Controllers
 {
@@ -15,6 +16,12 @@ namespace AIPlacement.MVC.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(RoleNames.Admin)) return RedirectToAction("Dashboard", "Admin");
+                if (User.IsInRole(RoleNames.Company)) return RedirectToAction("Index", "CompanyDashboard");
+                if (User.IsInRole(RoleNames.Student)) return RedirectToAction("Index", "StudentDashboard");
+            }
             return View();
         }
 

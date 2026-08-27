@@ -6,13 +6,20 @@ namespace AIPlacement.Application.Admin.Services;
 
 public class AnalyticsService : IAnalyticsService
 {
-    public Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+    private readonly IAdminRepository _repository;
+
+    public AnalyticsService(IAdminRepository repository)
     {
-        var students = AdminMockDataStore.Students;
-        var recruiters = AdminMockDataStore.Recruiters;
-        var jobDrives = AdminMockDataStore.JobDrives;
-        var applications = AdminMockDataStore.Applications;
-        var placements = AdminMockDataStore.Placements;
+        _repository = repository;
+    }
+
+    public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+    {
+        var students = await _repository.GetStudentsAsync();
+        var recruiters = await _repository.GetCompaniesAsync();
+        var jobDrives = await _repository.GetJobDrivesAsync(false);
+        var applications = await _repository.GetApplicationsAsync();
+        var placements = await _repository.GetPlacementsAsync();
 
         var totalStudents = students.Count;
         var placedCount = placements
@@ -40,26 +47,23 @@ public class AnalyticsService : IAnalyticsService
             HighestPackage = packages.Count == 0 ? 0m : packages.Max()
         };
 
-        return Task.FromResult(summary);
+        return summary;
     }
 
-    public Task<IReadOnlyList<BranchPlacementStatDto>> GetBranchPlacementStatsAsync()
+    public async Task<IReadOnlyList<BranchPlacementStatDto>> GetBranchPlacementStatsAsync()
     {
-        var students = AdminMockDataStore.Students;
-        var placements = AdminMockDataStore.Placements;
-
-        var placedStudentIds = placements
-            .Select(p => p.StudentId)
-            .ToHashSet();
+        var students = await _repository.GetStudentsAsync();
+        var placements = await _repository.GetPlacementsAsync();
 
         var stats = students
             .GroupBy(s => s.Branch ?? "Unspecified")
             .Select(group =>
             {
                 var total = group.Count();
-                var placed = group.Count(s => placedStudentIds.Contains(s.UserId));
+                var placed = group.Count(s =>
+                    placements.Any(p => p.RollNo == s.RollNo));
                 var branchPackages = placements
-                    .Where(p => group.Any(s => s.UserId == p.StudentId) && p.Package.HasValue)
+                    .Where(p => group.Any(s => s.RollNo == p.RollNo) && p.Package.HasValue)
                     .Select(p => p.Package!.Value)
                     .ToList();
 
@@ -75,16 +79,15 @@ public class AnalyticsService : IAnalyticsService
             .OrderByDescending(s => s.PlacementPercentage)
             .ToList();
 
-        IReadOnlyList<BranchPlacementStatDto> result = stats;
-        return Task.FromResult(result);
+        return stats;
     }
 
-    public Task<byte[]> ExportPlacementReportCsvAsync()
+    public async Task<byte[]> ExportPlacementReportCsvAsync()
     {
         var builder = new StringBuilder();
         builder.AppendLine("StudentName,RollNo,Branch,Company,JobTitle,Status,Package,PlacementDate");
 
-        foreach (var placement in AdminMockDataStore.Placements)
+        foreach (var placement in await _repository.GetPlacementsAsync())
         {
             builder.AppendLine(string.Join(',',
                 Escape(placement.StudentName),
@@ -98,7 +101,7 @@ public class AnalyticsService : IAnalyticsService
         }
 
         var bytes = Encoding.UTF8.GetBytes(builder.ToString());
-        return Task.FromResult(bytes);
+        return bytes;
     }
 
     private static string Escape(string? value)

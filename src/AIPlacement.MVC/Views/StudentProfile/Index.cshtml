@@ -1,0 +1,4 @@
+@model AIPlacement.Application.Students.DTOs.StudentDto
+@{ ViewData["Title"]="Profile"; }
+<div class="page-heading"><div><h1>Student Profile</h1><p>Your academic and contact information.</p></div><a asp-action="Edit" class="btn btn-primary">Edit profile</a></div>
+<div class="card"><div class="card-body p-4"><dl class="row mb-0"><dt class="col-sm-4">Roll number</dt><dd class="col-sm-8">@Model.RollNo</dd><dt class="col-sm-4">Branch</dt><dd class="col-sm-8">@Model.Branch</dd><dt class="col-sm-4">CGPA</dt><dd class="col-sm-8">@Model.CGPA</dd><dt class="col-sm-4">Graduation year</dt><dd class="col-sm-8">@Model.GraduationYear</dd><dt class="col-sm-4">Current backlogs</dt><dd class="col-sm-8">@Model.CurrentBacklogs</dd><dt class="col-sm-4">Phone</dt><dd class="col-sm-8">@Model.Phone</dd></dl></div></div>

@@ -1,34 +1,27 @@
 using AIPlacement.Application.Admin.DTOs;
 using AIPlacement.Application.Admin.Interfaces;
+using AIPlacement.Application.Jobs;
 
 namespace AIPlacement.Application.Admin.Services;
 
 public class JobDriveApprovalService : IJobDriveApprovalService
 {
-    public Task<IReadOnlyList<JobDriveApprovalDto>> GetPendingAsync()
-    {
-        IReadOnlyList<JobDriveApprovalDto> pending = AdminMockDataStore.JobDrives
-            .Where(d => d.ApprovalStatus == "Pending")
-            .ToList();
+    private readonly IAdminRepository _repository;
 
-        return Task.FromResult(pending);
+    public JobDriveApprovalService(IAdminRepository repository)
+    {
+        _repository = repository;
     }
 
-    public Task<IReadOnlyList<JobDriveApprovalDto>> GetAllAsync()
-    {
-        IReadOnlyList<JobDriveApprovalDto> all = AdminMockDataStore.JobDrives.ToList();
-        return Task.FromResult(all);
-    }
+    public Task<IReadOnlyList<JobDriveApprovalDto>> GetPendingAsync() =>
+        _repository.GetJobDrivesAsync(true);
 
-    public Task<JobDriveApprovalDto?> ApproveAsync(int jobDriveId)
-    {
-        var drive = AdminMockDataStore.SetApproval(jobDriveId, "Approved", reason: null);
-        return Task.FromResult(drive);
-    }
+    public Task<IReadOnlyList<JobDriveApprovalDto>> GetAllAsync() =>
+        _repository.GetJobDrivesAsync(false);
 
-    public Task<JobDriveApprovalDto?> RejectAsync(int jobDriveId, string reason)
-    {
-        var drive = AdminMockDataStore.SetApproval(jobDriveId, "Rejected", reason);
-        return Task.FromResult(drive);
-    }
+    public Task<JobDriveApprovalDto?> ApproveAsync(int jobDriveId) =>
+        _repository.SetJobDriveApprovalAsync(jobDriveId, JobDriveApprovalStatus.Approved);
+
+    public Task<JobDriveApprovalDto?> RejectAsync(int jobDriveId, string reason) =>
+        _repository.SetJobDriveApprovalAsync(jobDriveId, JobDriveApprovalStatus.Rejected);
 }

@@ -3,6 +3,7 @@ using AIPlacement.Application.Jobs.Interfaces;
 using AIPlacement.Application.Recruitment.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AIPlacement.API.Controllers;
 
@@ -45,6 +46,9 @@ public class JobDrivesController : ControllerBase
     [Authorize(Roles = "Company,Admin")]
     public async Task<IActionResult> GetByCompany(int companyId)
     {
+        if (User.IsInRole("Company") && !OwnsProfile(companyId))
+            return Forbid();
+
         var jobDrives = await _jobDriveService.GetByCompanyIdAsync(companyId);
         return Ok(jobDrives);
     }
@@ -53,6 +57,9 @@ public class JobDrivesController : ControllerBase
     [Authorize(Roles = "Student,Company,Admin")]
     public async Task<IActionResult> CheckEligibility(int jobDriveId, int studentId)
     {
+        if (User.IsInRole("Student") && !OwnsProfile(studentId))
+            return Forbid();
+
         try
         {
             var result = await _recruitmentService
@@ -69,6 +76,9 @@ public class JobDrivesController : ControllerBase
     [Authorize(Roles = "Company")]
     public async Task<IActionResult> Create(CreateJobDriveDto request)
     {
+        if (!OwnsProfile(request.CompanyId))
+            return Forbid();
+
         try
         {
             var jobDrive = await _jobDriveService.CreateAsync(request);
@@ -90,6 +100,9 @@ public class JobDrivesController : ControllerBase
         int jobDriveId,
         UpdateJobDriveDto request)
     {
+        if (!await OwnsJobDriveAsync(jobDriveId))
+            return Forbid();
+
         try
         {
             var jobDrive = await _jobDriveService.UpdateAsync(jobDriveId, request);
@@ -112,6 +125,9 @@ public class JobDrivesController : ControllerBase
     [Authorize(Roles = "Company")]
     public async Task<IActionResult> Publish(int jobDriveId)
     {
+        if (!await OwnsJobDriveAsync(jobDriveId))
+            return Forbid();
+
         try
         {
             var jobDrive = await _jobDriveService.PublishAsync(jobDriveId);
@@ -130,10 +146,22 @@ public class JobDrivesController : ControllerBase
     [Authorize(Roles = "Company")]
     public async Task<IActionResult> Close(int jobDriveId)
     {
+        if (!await OwnsJobDriveAsync(jobDriveId))
+            return Forbid();
+
         var jobDrive = await _jobDriveService.CloseAsync(jobDriveId);
 
         return jobDrive is null
             ? NotFound(new { message = "Job drive not found." })
             : Ok(jobDrive);
+    }
+
+    private bool OwnsProfile(int profileId) =>
+        int.TryParse(User.FindFirstValue("profile_id"), out var ownedId) && ownedId == profileId;
+
+    private async Task<bool> OwnsJobDriveAsync(int jobDriveId)
+    {
+        var jobDrive = await _jobDriveService.GetByIdAsync(jobDriveId);
+        return jobDrive is not null && OwnsProfile(jobDrive.CompanyId);
     }
 }

@@ -14,6 +14,8 @@
 
         public int GraduationYear { get; set; }
 
+        public int CurrentBacklogs { get; set; }
+
         public string? Phone { get; set; }
 
         public DateTime? DateOfBirth { get; set; }

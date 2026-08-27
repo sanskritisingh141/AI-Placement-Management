@@ -1,10 +1,13 @@
 ﻿using AIPlacement.Application.Placements.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using AIPlacement.Application.Authentication;
 
 namespace AIPlacement.API.Controllers;
 
 [ApiController]
 [Route("api/admin/placements")]
+[Authorize(Roles = RoleNames.Admin)]
 public class PlacementsController : ControllerBase
 {
     private readonly IPlacementService _placementService;
