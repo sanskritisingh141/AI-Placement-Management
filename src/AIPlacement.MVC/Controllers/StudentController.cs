@@ -1,4 +1,6 @@
-﻿using AIPlacement.Application.Certifications.Interfaces;
+﻿using AIPlacement.Application.Certifications.DTOs;
+using AIPlacement.Application.Certifications.Interfaces;
+using AIPlacement.Application.Projects.DTOs;
 using AIPlacement.Application.Projects.Interfaces;
 using AIPlacement.Application.Resumes.Interfaces;
 using AIPlacement.Application.Skills.DTOs;
@@ -30,6 +32,7 @@ public class StudentController : Controller
         _certificationService = certificationService;
         _resumeService = resumeService;
     }
+
 
     [HttpGet]
     public async Task<IActionResult> Dashboard(int studentId)
@@ -65,97 +68,8 @@ public class StudentController : Controller
         return View(student);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Skills(int studentId)
-    {
-        var skills =
-            await _skillService.GetByStudentIdAsync(studentId);
 
-        ViewBag.StudentId = studentId;
-
-        return View(skills);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddSkill(SkillDto skill)
-    {
-        if (!ModelState.IsValid)
-            return RedirectToAction(nameof(Skills),
-                new { studentId = skill.StudentId });
-
-        await _skillService.CreateAsync(skill);
-
-        return RedirectToAction(nameof(Skills),
-            new { studentId = skill.StudentId });
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditSkill(
-        int skillId,
-        SkillDto skill)
-    {
-        if (!ModelState.IsValid)
-            return RedirectToAction(nameof(Skills),
-                new { studentId = skill.StudentId });
-
-        var updated = await _skillService.UpdateAsync(
-            skillId,
-            skill);
-
-        if (updated == null)
-            return NotFound();
-
-        return RedirectToAction(nameof(Skills),
-            new { studentId = skill.StudentId });
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteSkill(
-        int skillId,
-        int studentId)
-    {
-        await _skillService.DeleteAsync(skillId);
-
-        return RedirectToAction(nameof(Skills),
-            new { studentId });
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Projects(int studentId)
-    {
-        var projects =
-            await _projectService.GetByStudentIdAsync(studentId);
-
-        ViewBag.StudentId = studentId;
-
-        return View(projects);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Certifications(int studentId)
-    {
-        var certifications =
-            await _certificationService.GetByStudentIdAsync(studentId);
-
-        ViewBag.StudentId = studentId;
-
-        return View(certifications);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Resume(int studentId)
-    {
-        var resumes =
-            await _resumeService.GetByStudentIdAsync(studentId);
-
-        ViewBag.StudentId = studentId;
-
-        return View(resumes);
-    }
-
+    
     [HttpGet]
     public async Task<IActionResult> EditProfile(int studentId)
     {
@@ -167,11 +81,12 @@ public class StudentController : Controller
         return View(student);
     }
 
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditProfile(
-    int studentId,
-    StudentDto student)
+        int studentId,
+        StudentDto student)
     {
         if (!ModelState.IsValid)
             return View(student);
@@ -186,5 +101,225 @@ public class StudentController : Controller
         return RedirectToAction(
             nameof(Profile),
             new { studentId });
+    }
+
+
+   
+    [HttpGet]
+    public async Task<IActionResult> Skills(int studentId)
+    {
+        var skills =
+            await _skillService.GetByStudentIdAsync(studentId);
+
+        ViewBag.StudentId = studentId;
+
+        return View(skills);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddSkill(SkillDto skill)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Skills),
+                new { studentId = skill.StudentId });
+
+        await _skillService.CreateAsync(skill);
+
+        return RedirectToAction(
+            nameof(Skills),
+            new { studentId = skill.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditSkill(
+        int skillId,
+        SkillDto skill)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Skills),
+                new { studentId = skill.StudentId });
+
+        var updated = await _skillService.UpdateAsync(
+            skillId,
+            skill);
+
+        if (updated == null)
+            return NotFound();
+
+        return RedirectToAction(
+            nameof(Skills),
+            new { studentId = skill.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSkill(
+        int skillId,
+        int studentId)
+    {
+        await _skillService.DeleteAsync(skillId);
+
+        return RedirectToAction(
+            nameof(Skills),
+            new { studentId });
+    }
+
+
+
+    [HttpGet]
+    public async Task<IActionResult> Projects(int studentId)
+    {
+        var projects =
+            await _projectService.GetByStudentIdAsync(studentId);
+
+        ViewBag.StudentId = studentId;
+
+        return View(projects);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddProject(ProjectDto project)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Projects),
+                new { studentId = project.StudentId });
+
+        await _projectService.CreateAsync(project);
+
+        return RedirectToAction(
+            nameof(Projects),
+            new { studentId = project.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditProject(
+        int projectId,
+        ProjectDto project)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Projects),
+                new { studentId = project.StudentId });
+
+        var updated = await _projectService.UpdateAsync(
+            projectId,
+            project);
+
+        if (updated == null)
+            return NotFound();
+
+        return RedirectToAction(
+            nameof(Projects),
+            new { studentId = project.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteProject(
+        int projectId,
+        int studentId)
+    {
+        await _projectService.DeleteAsync(projectId);
+
+        return RedirectToAction(
+            nameof(Projects),
+            new { studentId });
+    }
+
+
+ 
+    [HttpGet]
+    public async Task<IActionResult> Certifications(int studentId)
+    {
+        var certifications =
+            await _certificationService.GetByStudentIdAsync(studentId);
+
+        ViewBag.StudentId = studentId;
+
+        return View(certifications);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddCertification(
+        CertificationDto certification)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Certifications),
+                new { studentId = certification.StudentId });
+
+        await _certificationService.CreateAsync(certification);
+
+        return RedirectToAction(
+            nameof(Certifications),
+            new { studentId = certification.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditCertification(
+        int certificationId,
+        CertificationDto certification)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction(
+                nameof(Certifications),
+                new { studentId = certification.StudentId });
+
+        var updated =
+            await _certificationService.UpdateAsync(
+                certificationId,
+                certification);
+
+        if (updated == null)
+            return NotFound();
+
+        return RedirectToAction(
+            nameof(Certifications),
+            new { studentId = certification.StudentId });
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteCertification(
+        int certificationId,
+        int studentId)
+    {
+        await _certificationService.DeleteAsync(
+            certificationId);
+
+        return RedirectToAction(
+            nameof(Certifications),
+            new { studentId });
+    }
+
+
+  
+    [HttpGet]
+    public async Task<IActionResult> Resume(int studentId)
+    {
+        var resumes =
+            await _resumeService.GetByStudentIdAsync(studentId);
+
+        ViewBag.StudentId = studentId;
+
+        return View(resumes);
     }
 }

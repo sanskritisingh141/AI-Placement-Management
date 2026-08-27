@@ -7,11 +7,11 @@
 
 <div class="container mt-4">
 
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1>My Skills</h1>
-            <p class="text-muted">
+            <h1 class="fw-bold">My Skills</h1>
+            <p class="text-muted mb-0">
                 Manage your technical and professional skills.
             </p>
         </div>
@@ -24,12 +24,13 @@
         </a>
     </div>
 
-
-    <!-- Add Skill -->
+    <!-- Add Skill Card -->
     <div class="card shadow-sm mb-4">
-        <div class="card-body">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Add Skill</h5>
+        </div>
 
-            <h4 class="mb-3">Add Skill</h4>
+        <div class="card-body">
 
             <form asp-controller="Student"
                   asp-action="AddSkill"
@@ -43,8 +44,9 @@
 
                 <div class="row">
 
+                    <!-- Skill Name -->
                     <div class="col-md-5 mb-3">
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
                             Skill Name
                         </label>
 
@@ -55,8 +57,9 @@
                                required />
                     </div>
 
+                    <!-- Proficiency -->
                     <div class="col-md-5 mb-3">
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
                             Proficiency Level
                         </label>
 
@@ -87,6 +90,7 @@
                         </select>
                     </div>
 
+                    <!-- Add Button -->
                     <div class="col-md-2 mb-3 d-flex align-items-end">
                         <button type="submit"
                                 class="btn btn-primary w-100">
@@ -102,19 +106,22 @@
     </div>
 
 
-    <!-- Existing Skills -->
+    <!-- Skills List -->
     <div class="card shadow-sm">
-        <div class="card-body">
 
-            <h4 class="mb-3">Your Skills</h4>
+        <div class="card-header">
+            <h5 class="mb-0">Your Skills</h5>
+        </div>
+
+        <div class="card-body">
 
             @if (Model != null && Model.Any())
             {
                 <div class="table-responsive">
 
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle mb-0">
 
-                        <thead>
+                        <thead class="table-light">
                             <tr>
                                 <th>Skill</th>
                                 <th>Proficiency</th>
@@ -135,7 +142,36 @@
                                     </td>
 
                                     <td>
-                                        @skill.ProficiencyLevel
+                                        @if (skill.ProficiencyLevel == "Beginner")
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Beginner
+                                            </span>
+                                        }
+                                        else if (skill.ProficiencyLevel == "Intermediate")
+                                        {
+                                            <span class="badge bg-info">
+                                                Intermediate
+                                            </span>
+                                        }
+                                        else if (skill.ProficiencyLevel == "Advanced")
+                                        {
+                                            <span class="badge bg-primary">
+                                                Advanced
+                                            </span>
+                                        }
+                                        else if (skill.ProficiencyLevel == "Expert")
+                                        {
+                                            <span class="badge bg-success">
+                                                Expert
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @skill.ProficiencyLevel
+                                            </span>
+                                        }
                                     </td>
 
                                     <td class="text-end">
@@ -185,20 +221,15 @@
             }
             else
             {
-                <div class="text-center py-4">
-
-                    <p class="text-muted mb-3">
-                        You haven't added any skills yet.
-                    </p>
-
-                    <p class="text-muted">
-                        Add your first skill using the form above.
-                    </p>
-
+                <div class="alert alert-info mb-0">
+                    <strong>No skills added yet.</strong>
+                    <br />
+                    Add your first skill using the form above.
                 </div>
             }
 
         </div>
+
     </div>
 
 
@@ -246,9 +277,10 @@
                                        name="StudentId"
                                        value="@skill.StudentId" />
 
+                                <!-- Skill Name -->
                                 <div class="mb-3">
 
-                                    <label class="form-label">
+                                    <label class="form-label fw-semibold">
                                         Skill Name
                                     </label>
 
@@ -260,9 +292,10 @@
 
                                 </div>
 
+                                <!-- Proficiency -->
                                 <div class="mb-3">
 
-                                    <label class="form-label">
+                                    <label class="form-label fw-semibold">
                                         Proficiency Level
                                     </label>
 
@@ -270,57 +303,25 @@
                                             class="form-select"
                                             required>
 
-                                        @if (skill.ProficiencyLevel == "Beginner")
-                                        {
-                                            <option value="Beginner" selected>
-                                                Beginner
-                                            </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="Beginner">
-                                                Beginner
-                                            </option>
-                                        }
+                                        <option value="Beginner"
+                                                selected="@(skill.ProficiencyLevel == "Beginner")">
+                                            Beginner
+                                        </option>
 
-                                        @if (skill.ProficiencyLevel == "Intermediate")
-                                        {
-                                            <option value="Intermediate" selected>
-                                                Intermediate
-                                            </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="Intermediate">
-                                                Intermediate
-                                            </option>
-                                        }
+                                        <option value="Intermediate"
+                                                selected="@(skill.ProficiencyLevel == "Intermediate")">
+                                            Intermediate
+                                        </option>
 
-                                        @if (skill.ProficiencyLevel == "Advanced")
-                                        {
-                                            <option value="Advanced" selected>
-                                                Advanced
-                                            </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="Advanced">
-                                                Advanced
-                                            </option>
-                                        }
+                                        <option value="Advanced"
+                                                selected="@(skill.ProficiencyLevel == "Advanced")">
+                                            Advanced
+                                        </option>
 
-                                        @if (skill.ProficiencyLevel == "Expert")
-                                        {
-                                            <option value="Expert" selected>
-                                                Expert
-                                            </option>
-                                        }
-                                        else
-                                        {
-                                            <option value="Expert">
-                                                Expert
-                                            </option>
-                                        }
+                                        <option value="Expert"
+                                                selected="@(skill.ProficiencyLevel == "Expert")">
+                                            Expert
+                                        </option>
 
                                     </select>
 
