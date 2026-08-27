@@ -1,5 +1,7 @@
 using AIPlacement.Application.Admin.Interfaces;
 using AIPlacement.Application.Admin.Services;
+using AIPlacement.Application.Applications.Interfaces;
+using AIPlacement.Application.Applications.Services;
 using AIPlacement.Application.Certifications.Interfaces;
 using AIPlacement.Application.Certifications.Services;
 using AIPlacement.Application.Company.Interfaces;
@@ -186,7 +188,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
 // ===============================
-// Admin + Analytics (Pair 3)
+// Admin + Analytics 
 // ===============================
 
 builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
@@ -202,6 +204,13 @@ builder.Services.AddScoped<IPlacementService, PlacementService>();
 
 builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
 builder.Services.AddScoped<IRecruitmentService, RecruitmentService>();
+
+// ===============================
+// Application Status History
+// ===============================
+
+builder.Services.AddScoped<IApplicationStatusHistoryRepository, ApplicationStatusHistoryRepository>();
+builder.Services.AddScoped<IApplicationStatusHistoryService, ApplicationStatusHistoryService>();
 
 var app = builder.Build();
 
