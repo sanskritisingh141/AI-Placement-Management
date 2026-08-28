@@ -34,6 +34,9 @@ public class AIService : IAIService
             CatalogByName(catalog));
     }
 
+    public Task<ResumeAnalysisResultDto?> GetLatestAnalysisAsync(int resumeId) =>
+        _repository.GetLatestAnalysisAsync(resumeId);
+
     public async Task<JobMatchResultDto> CalculateMatchAsync(
         int studentId,
         int jobDriveId,

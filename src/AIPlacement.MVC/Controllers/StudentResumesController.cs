@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using AIPlacement.Application.AI.DTOs;
 using AIPlacement.Application.AI.Interfaces;
 using AIPlacement.Application.Authentication;
 using AIPlacement.Application.Resumes.Interfaces;
+using AIPlacement.MVC.Models.StudentResumes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +18,23 @@ public class StudentResumesController(
     private const long MaximumBytes = 5 * 1024 * 1024;
     private int StudentId => int.Parse(User.FindFirstValue("profile_id")!);
 
-    public async Task<IActionResult> Index() => View(await resumes.GetByStudentIdAsync(StudentId));
+    public async Task<IActionResult> Index()
+    {
+        var studentResumes = (await resumes.GetByStudentIdAsync(StudentId)).ToList();
+        var latestAnalyses = new Dictionary<int, ResumeAnalysisResultDto>();
+        foreach (var resume in studentResumes)
+        {
+            var analysis = await ai.GetLatestAnalysisAsync(resume.ResumeId);
+            if (analysis is not null)
+                latestAnalyses[resume.ResumeId] = analysis;
+        }
+
+        return View(new StudentResumeIndexViewModel
+        {
+            Resumes = studentResumes,
+            LatestAnalyses = latestAnalyses
+        });
+    }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(IFormFile file)

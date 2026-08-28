@@ -45,6 +45,40 @@ public class AIRepository : IAIRepository
                     .FirstOrDefault()))
             .SingleOrDefaultAsync();
 
+    public async Task<ResumeAnalysisResultDto?> GetLatestAnalysisAsync(int resumeId)
+    {
+        var analysis = await _dbContext.ResumeAnalyses.AsNoTracking()
+            .Where(item => item.ResumeId == resumeId)
+            .OrderByDescending(item => item.AnalyzedAt)
+            .Select(item => new ResumeAnalysisResultDto
+            {
+                AnalysisId = item.AnalysisId,
+                ResumeId = item.ResumeId,
+                AnalyzedAt = item.AnalyzedAt,
+                ExtractedText = item.ExtractedText ?? string.Empty,
+                Summary = item.Summary ?? string.Empty,
+                ModelVersion = item.ModelVersion ?? string.Empty
+            })
+            .FirstOrDefaultAsync();
+
+        if (analysis is null)
+            return null;
+
+        analysis.Skills = await (
+            from extractedSkill in _dbContext.ExtractedSkills.AsNoTracking()
+            join skill in _dbContext.Skills.AsNoTracking()
+                on extractedSkill.SkillId equals skill.SkillId
+            where extractedSkill.AnalysisId == analysis.AnalysisId
+            orderby extractedSkill.ConfidenceScore descending, skill.SkillName
+            select new ExtractedSkillResultDto
+            {
+                Name = skill.SkillName,
+                Confidence = extractedSkill.ConfidenceScore
+            }).ToListAsync();
+
+        return analysis;
+    }
+
     public async Task<IReadOnlyList<SkillCatalogItem>> GetSkillCatalogAsync() =>
         await _dbContext.Skills.AsNoTracking()
             .OrderBy(skill => skill.SkillName)
@@ -107,6 +141,7 @@ public class AIRepository : IAIRepository
         await _dbContext.SaveChangesAsync();
         result.AnalysisId = analysis.AnalysisId;
         result.ResumeId = resumeId;
+        result.AnalyzedAt = analysis.AnalyzedAt;
         return result;
     }
 

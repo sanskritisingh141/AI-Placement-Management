@@ -15,6 +15,7 @@ public class ResumeAnalysisResultDto
 {
     public int AnalysisId { get; set; }
     public int ResumeId { get; set; }
+    public DateTime AnalyzedAt { get; set; }
 
     [JsonPropertyName("extracted_text")]
     public string ExtractedText { get; set; } = string.Empty;

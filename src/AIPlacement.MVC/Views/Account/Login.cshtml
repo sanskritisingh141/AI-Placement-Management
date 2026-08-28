@@ -1,36 +1,81 @@
 @model AIPlacement.Application.Authentication.DTOs.LoginRequestDto
 @{
     ViewData["Title"] = "Sign in";
+    Layout = "_AuthLayout";
 }
 
-<div class="row justify-content-center py-5">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h1 class="h3 mb-2">Welcome back</h1>
-                <p class="text-muted mb-4">Sign in to your placement account.</p>
-                <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" autocomplete="email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-                    <button class="btn btn-primary w-100" type="submit">Sign in</button>
-                </form>
-                <p class="text-center mt-3 mb-0">
-                    New here? <a asp-action="Register">Create an account</a>
-                </p>
+<div class="auth-shell">
+    <section class="auth-showcase" aria-label="AI Placement System introduction">
+        <a class="auth-brand" asp-controller="Home" asp-action="Index">
+            <span class="auth-brand-mark" aria-hidden="true">◆</span>
+            <span>AI Placement System</span>
+        </a>
+
+        <div class="auth-showcase-content">
+            <span class="auth-eyebrow">Smarter campus placements</span>
+            <h1>Turn your potential into the right opportunity.</h1>
+            <p>One connected platform for students, recruiters, and placement teams—from profile building to final selection.</p>
+            <div class="auth-feature-list">
+                <div><span aria-hidden="true">✓</span><p><strong>Discover opportunities</strong><small>Explore relevant job drives in one place.</small></p></div>
+                <div><span aria-hidden="true">✓</span><p><strong>Understand your fit</strong><small>Review resume insights and skill gaps.</small></p></div>
+                <div><span aria-hidden="true">✓</span><p><strong>Track every step</strong><small>Stay informed throughout the hiring journey.</small></p></div>
             </div>
         </div>
-    </div>
+
+        <div class="auth-visual" aria-hidden="true">
+            <div class="auth-orbit"></div>
+            <div class="auth-visual-card auth-visual-card-main"><span>AI</span><strong>Career match</strong><small>Skills meet opportunity</small></div>
+            <div class="auth-visual-card auth-visual-card-small">✓ Ready</div>
+        </div>
+    </section>
+
+    <section class="auth-form-panel">
+        <div class="auth-form-wrap">
+            <div class="auth-mobile-brand"><span>◆</span> AI Placement System</div>
+            <span class="auth-eyebrow text-primary">Welcome back</span>
+            <h2>Sign in to your account</h2>
+            <p class="auth-form-intro">Enter your credentials to continue to your dashboard.</p>
+
+            <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email address</label>
+                    <input asp-for="Email" class="form-control form-control-lg" autocomplete="email" placeholder="name@example.com" autofocus />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label"></label>
+                    <div class="password-field">
+                        <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" placeholder="Enter your password" />
+                        <button type="button" class="password-toggle" data-password-toggle aria-label="Show password" aria-pressed="false">Show</button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <button class="btn btn-primary btn-lg w-100 auth-submit" type="submit">Sign in</button>
+            </form>
+
+            <p class="auth-register-link">New to AI Placement? <a asp-action="Register">Create an account</a></p>
+            <p class="auth-security-note"><span aria-hidden="true">●</span> Secure access for Students, Companies, and Administrators</p>
+        </div>
+    </section>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const toggle = document.querySelector('[data-password-toggle]');
+            const password = document.getElementById('@Html.IdFor(model => model.Password)');
+            if (!toggle || !password) return;
+
+            toggle.addEventListener('click', () => {
+                const show = password.type === 'password';
+                password.type = show ? 'text' : 'password';
+                toggle.textContent = show ? 'Hide' : 'Show';
+                toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+                toggle.setAttribute('aria-pressed', show.toString());
+                password.focus();
+            });
+        })();
+    </script>
 }

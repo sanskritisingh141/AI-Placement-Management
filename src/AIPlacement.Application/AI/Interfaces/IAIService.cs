@@ -8,6 +8,7 @@ public interface IAIService
         int resumeId,
         byte[] pdf,
         CancellationToken cancellationToken = default);
+    Task<ResumeAnalysisResultDto?> GetLatestAnalysisAsync(int resumeId);
     Task<JobMatchResultDto> CalculateMatchAsync(
         int studentId,
         int jobDriveId,

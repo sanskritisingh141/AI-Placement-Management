@@ -6,6 +6,7 @@ public interface IAIRepository
 {
     Task<ResumeAnalysisSource?> GetResumeSourceAsync(int resumeId);
     Task<ResumeAnalysisSource?> GetCurrentResumeSourceAsync(int studentId);
+    Task<ResumeAnalysisResultDto?> GetLatestAnalysisAsync(int resumeId);
     Task<IReadOnlyList<SkillCatalogItem>> GetSkillCatalogAsync();
     Task<IReadOnlyList<string>> GetStudentSkillNamesAsync(int studentId);
     Task<IReadOnlyList<string>> GetRequiredSkillNamesAsync(int jobDriveId);

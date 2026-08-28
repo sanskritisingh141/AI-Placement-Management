@@ -1,2 +1,113 @@
-@model IEnumerable<AIPlacement.Application.Resumes.DTOs.ResumeDto>
-@{ViewData["Title"]="Resume";}<div class="page-heading"><div><h1>Resume</h1><p>Upload versioned PDF resumes and run AI analysis.</p></div></div>@if(TempData["Success"] is string ok){<div class="alert alert-success">@ok</div>}@if(TempData["Error"] is string er){<div class="alert alert-danger">@er</div>}<div class="card mb-4"><div class="card-body"><form asp-action="Upload" method="post" enctype="multipart/form-data" class="d-flex gap-2"><input name="file" type="file" accept="application/pdf,.pdf" class="form-control" required/><button class="btn btn-primary">Upload PDF</button></form><small class="text-muted">Maximum 5 MB. Uploading creates a new version and retains history.</small></div></div><div class="card"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>File</th><th>Version</th><th>Uploaded</th><th>Current</th><th></th></tr></thead><tbody>@foreach(var r in Model){<tr><td>@r.FileName</td><td>v@r.VersionNo</td><td>@r.UploadedAt?.ToString("dd MMM yyyy HH:mm")</td><td>@if(r.IsCurrent==true){<span class="badge text-bg-success">Current</span>}</td><td><div class="d-flex gap-2"><a asp-action="Download" asp-route-id="@r.ResumeId" class="btn btn-sm btn-outline-primary">Download</a><form asp-action="Analyze" asp-route-id="@r.ResumeId" method="post"><button class="btn btn-sm btn-primary">Analyze</button></form></div></td></tr>}</tbody></table></div></div>
+@model AIPlacement.MVC.Models.StudentResumes.StudentResumeIndexViewModel
+@{
+    ViewData["Title"] = "Resume";
+}
+
+<div class="page-heading resume-heading">
+    <div>
+        <span class="page-kicker">Profile intelligence</span>
+        <h1>Resume centre</h1>
+        <p>Keep your PDF resume current and review the latest analysis saved to your profile.</p>
+    </div>
+    <span class="resume-version-count">@Model.Resumes.Count version@(Model.Resumes.Count == 1 ? "" : "s")</span>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="alert">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+<section class="content-card resume-upload-card mb-4">
+    <div class="resume-upload-copy">
+        <span class="resume-upload-icon" aria-hidden="true">↥</span>
+        <div><h2>Upload a new version</h2><p>PDF only, up to 5 MB. Previous versions remain available.</p></div>
+    </div>
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" class="resume-upload-form">
+        <label class="visually-hidden" for="resume-file">Choose PDF resume</label>
+        <input id="resume-file" name="file" type="file" accept="application/pdf,.pdf" class="form-control" required />
+        <button class="btn btn-primary" type="submit">Upload PDF</button>
+    </form>
+</section>
+
+@if (Model.Resumes.Count == 0)
+{
+    <div class="content-card resume-empty-state">
+        <span aria-hidden="true">▤</span>
+        <h2>No resume uploaded yet</h2>
+        <p>Upload your first PDF resume to begin building version history and run analysis.</p>
+    </div>
+}
+else
+{
+    <div class="resume-list">
+        @foreach (var resume in Model.Resumes.OrderByDescending(item => item.VersionNo))
+        {
+            var hasAnalysis = Model.LatestAnalyses.TryGetValue(resume.ResumeId, out var analysis);
+            <article class="content-card resume-card @(resume.IsCurrent == true ? "resume-card-current" : "")">
+                <header class="resume-card-header">
+                    <div class="resume-file-meta">
+                        <span class="resume-file-icon" aria-hidden="true">PDF</span>
+                        <div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <h2>@(resume.FileName ?? "Resume.pdf")</h2>
+                                @if (resume.IsCurrent == true)
+                                {
+                                    <span class="badge rounded-pill text-bg-success">Current</span>
+                                }
+                                <span class="badge rounded-pill text-bg-light">Version @resume.VersionNo</span>
+                            </div>
+                            <p>Uploaded @(resume.UploadedAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "—")</p>
+                        </div>
+                    </div>
+                    <div class="resume-actions">
+                        <a asp-action="Download" asp-route-id="@resume.ResumeId" class="btn btn-outline-primary">Download</a>
+                        <form asp-action="Analyze" asp-route-id="@resume.ResumeId" method="post">
+                            <button class="btn btn-primary" type="submit">@(hasAnalysis ? "Analyze again" : "Analyze resume")</button>
+                        </form>
+                    </div>
+                </header>
+
+                @if (hasAnalysis && analysis is not null)
+                {
+                    <div class="resume-analysis">
+                        <div class="analysis-title-row">
+                            <div><span class="analysis-status-dot"></span><strong>Latest analysis</strong></div>
+                            <small>@analysis.AnalyzedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
+                        </div>
+
+                        <div class="analysis-grid">
+                            <section class="analysis-summary">
+                                <span class="analysis-label">Resume summary</span>
+                                <p>@(string.IsNullOrWhiteSpace(analysis.Summary) ? "No summary was produced for this resume." : analysis.Summary)</p>
+                            </section>
+                            <section>
+                                <span class="analysis-label">Extracted skills (@analysis.Skills.Count)</span>
+                                @if (analysis.Skills.Count > 0)
+                                {
+                                    <div class="analysis-skills">
+                                        @foreach (var skill in analysis.Skills)
+                                        {
+                                            <span class="analysis-skill"><strong>@skill.Name</strong><small>@((skill.Confidence * 100).ToString("0"))%</small></span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="analysis-empty">No catalogue skills were detected.</p>
+                                }
+                            </section>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="resume-analysis-prompt"><span aria-hidden="true">✦</span><p><strong>Analysis not run yet</strong><small>Analyze this version to view its summary and extracted skills.</small></p></div>
+                }
+            </article>
+        }
+    </div>
+}
